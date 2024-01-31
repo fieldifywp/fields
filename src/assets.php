@@ -4,13 +4,11 @@ declare( strict_types=1 );
 
 namespace Fieldify\Fields;
 
-use function add_action;
 use function array_values;
 use function wp_enqueue_style;
 use function wp_localize_script;
 use function wp_register_style;
 
-add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\enqueue_editor_assets' );
 /**
  * Enqueues editor assets.
  *
@@ -23,8 +21,7 @@ function enqueue_editor_assets(): void {
 		return;
 	}
 
-	$dir = get_dir();
-
+	$dir        = get_dir();
 	$asset_file = $dir . 'public/js/index.asset.php';
 
 	if ( ! file_exists( $asset_file ) ) {
@@ -32,10 +29,11 @@ function enqueue_editor_assets(): void {
 	}
 
 	$slug = get_slug();
+	$uri  = get_uri();
 
 	$style = [
 		'handle' => $slug,
-		'src'    => get_uri() . 'public/css/index.css',
+		'src'    => $uri . 'public/css/index.css',
 		'deps'   => [],
 		'ver'    => filemtime( $dir . 'public/css/index.css' ),
 		'media'  => 'all',
@@ -49,7 +47,7 @@ function enqueue_editor_assets(): void {
 
 	$script = [
 		'handle'    => $slug,
-		'src'       => get_uri() . 'public/js/index.js',
+		'src'       => $uri . 'public/js/index.js',
 		'deps'      => $asset['dependencies'] ?? [],
 		'ver'       => $asset['version'] ?? filemtime( $dir . 'public/js/index.js' ),
 		'in_footer' => true,
