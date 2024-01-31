@@ -35,21 +35,21 @@ register_block('my-block', [
 
 ```
 
-### Metaboxes
+### Meta Boxes
 
 ```php
-register_meta_box('my-metabox', [
-	'title' => 'My Metabox',
+register_meta_box('my-meta-box', [
+	'title' => 'My Meta Box',
 	'screen' => 'post',
 	'context' => 'side',
 	'priority' => 'default',
 	'callback' => function ($post) {
-		echo '<p>My metabox content</p>';
+		echo '<p>My meta box content</p>';
 	},
 	'fields' => [
 		'content' => [
 			'type' => 'string',
-			'default' => 'My metabox content',
+			'default' => 'My meta box content',
 		],
 	],
 ]);

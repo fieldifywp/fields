@@ -61,6 +61,7 @@ function enqueue_editor_assets(): void {
 		$slug,
 		$slug,
 		[
+			'postType'  => get_post_type(),
 			'blocks'    => get_blocks(),
 			'metaBoxes' => get_meta_boxes(),
 			'settings'  => get_settings(),
