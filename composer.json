@@ -20,19 +20,11 @@
   },
   "autoload": {
     "files": [
-      "autoload.php"
-    ],
-    "psr-4": {
-      "Fieldify\\Fields\\": "src/"
-    }
-  },
-  "require": {
-    "blockify/utilities": "dev-main"
-  },
-  "repositories": [
-    {
-      "type": "git",
-      "url": "git@github.com:blockifywp/utilities.git"
-    }
-  ]
+      "src/assets.php",
+      "src/blocks.php",
+      "src/meta-boxes.php",
+      "src/settings.php",
+      "src/utilities.php"
+    ]
+  }
 }
