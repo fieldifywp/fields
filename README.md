@@ -1,6 +1,7 @@
 # Fieldify
 
-Composer package for creating react-powered fields, blocks and settings in the WordPress editor with only PHP.
+Composer package for creating react-powered fields, blocks and settings in the
+WordPress editor with only PHP.
 
 ## Installation
 
@@ -15,55 +16,55 @@ composer require fieldify/fields
 ### Blocks
 
 ```php
-add_filter('fieldify', function ($fields) {
-	$fields['my-field'] = [
-		'title' => 'My Field',
-		'description' => 'My field description',
-		'category' => 'common',
-		'icon' => 'admin-site',
-		'keywords' => ['my', 'field'],
-		'render_callback' => function ($attributes, $content) {
-			return '<div class="my-field">' . $content . '</div>';
-		},
-		'attributes' => [
-			'content' => [
-				'type' => 'string',
-				'default' => 'My field content',
-			],
+register_block('my-block', [
+	'title' => 'My Block',
+	'description' => 'My block description',
+	'category' => 'common',
+	'icon' => 'admin-site',
+	'keywords' => ['my', 'block'],
+	'render_callback' => function ($attributes, $content) {
+		return '<div class="my-block">' . $content . '</div>';
+	},
+	'attributes' => [
+		'content' => [
+			'type' => 'string',
+			'default' => 'My block content',
 		],
-	];
+	],
+]);
 
-	return $fields;
-});
 ```
 
 ### Metaboxes
 
 ```php
-add_filter('fieldify', function ($fields) {
-	$fields['my-field'] = [
-		'title' => 'My Field',
-		'description' => 'My field description',
-		'category' => 'common',
-		'icon' => 'admin-site',
-		'keywords' => ['my', 'field'],
-		'render_callback' => function ($attributes, $content) {
-			return '<div class="my-field">' . $content . '</div>';
-		},
-		'attributes' => [
-			'content' => [
-				'type' => 'string',
-				'default' => 'My field content',
-			],
+register_meta_box('my-metabox', [
+	'title' => 'My Metabox',
+	'screen' => 'post',
+	'context' => 'side',
+	'priority' => 'default',
+	'callback' => function ($post) {
+		echo '<p>My metabox content</p>';
+	},
+	'fields' => [
+		'content' => [
+			'type' => 'string',
+			'default' => 'My metabox content',
 		],
-	];
-
-	return $fields;
-});
+	],
+]);
 ```
 
 ### Settings
 
 ```php
-
+register_settings('my-settings', [
+	'title' => 'My Settings',
+	'fields' => [
+		'content' => [
+			'type' => 'string',
+			'default' => 'My settings content',
+		],
+	],
+])
 ```
