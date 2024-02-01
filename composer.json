@@ -25,6 +25,9 @@
       "src/meta-boxes.php",
       "src/settings.php",
       "src/utilities.php"
-    ]
+    ],
+    "psr-4": {
+      "Fieldify\\Fields\\": "src/"
+    }
   }
 }

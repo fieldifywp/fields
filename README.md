@@ -42,30 +42,42 @@ Block names must include a namespace and be in kebab-case in the following
 format: `namespace/my-block`.
 
 ```php
-register_block("namespace/my-block", [
-	"title" => "My Block",
-	"description" => "My block description",
-	"category" => "common",
-	"icon" => "admin-site",
-	"keywords" => ["my", "block"],
-	"render_callback" => function ($attributes, $content) {
-		return "<div class='my-block'>" . $content . "</div>";
+register_block( 'namespace/my-block', [
+	'title'           => 'My Block',
+	'description'     => 'My block description',
+	'category'        => 'custom',
+	'icon'            => 'admin-site',
+	'keywords'        => [ 'my', 'block' ],
+	'render_callback' => static function ( $attributes, $content ) {
+		return '<div class="my-block">' . ( $attributes['content'] ?? 'no content' ) . '</div>';
 	},
-	"panels" => [
-		"content" => [
-			"title" => "Content",
-			"initialOpen" => false,
-			"className" => "my-block-content-panel-extra-class-name",
+	'panels'          => [
+		'content' => [
+			'title' => 'Content',
 		],
 	],
-	"attributes" => [
-		"content" => [
-			"type" => "string",
-			"default" => "My block content",
-			"panel" => "content",
+	'attributes'      => [
+		'hideContentSetting'  => [
+			'type'    => 'boolean',
+			'default' => false,
+			'panel'   => 'content',
+			'control' => 'toggle',
+		],
+		'content' => [
+			'type'    => 'string',
+			'default' => 'My block content',
+			'panel'   => 'content',
+			'control' => 'text',
+			'show_if' => [
+				[
+					'attribute' => 'hideContentSetting',
+					'operator'  => '!==',
+					'value'     => true,
+				],
+			],
 		],
 	],
-]);
+] );
 ```
 
 *Attributes*
