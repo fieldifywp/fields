@@ -11,6 +11,23 @@ From your theme or plugin directory:
 composer require fieldify/fields
 ```
 
+Currently, this package is not available on Packagist. To install from GitHub,
+add the following to your composer.json file:
+
+```json
+{
+	"require": {
+		"fieldify/fields": "dev-main"
+	},
+	"repositories": [
+		{
+			"type": "git",
+			"url": "git@github.com:fieldifywp/fields.git"
+		}
+	]
+}
+```
+
 ## Usage
 
 ### Registration
