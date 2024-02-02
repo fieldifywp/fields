@@ -56,52 +56,182 @@ Block names must include a namespace and be in kebab-case in the following
 format: `namespace/my-block`.
 
 ```php
+
 register_block( 'namespace/my-block', [
 	'title'           => __( 'My Block', 'text-domain' ),
 	'description'     => __( 'My custom block', 'text-domain' ),
 	'category'        => 'custom',
-	'icon'            => 'admin-site',
+	// Uncomment to use dashicons.
+	// 'icon'		  => 'admin-site',
+	'icon'            => [
+		'src' => get_icon( 'wordpress', 'star-filled' ),
+	],
 	'keywords'        => [ 'my', 'block' ],
 	'render_callback' => static function ( array $attributes, string $content ): string {
 		return '<div class="my-block">' . ( $attributes['content'] ?? 'no content' ) . '</div>';
 	},
 	'style'           => plugin_dir_url( __FILE__ ) . '/assets/my-block.css',
 	'supports'        => [
-		'color'            => [
+		'color'   => [
 			'text'       => true,
 			'background' => false,
 		],
-		'spacing'          => [
+		'spacing' => [
 			'blockGap' => true,
 			'margin'   => true,
 		],
 	],
 	'panels'          => [
-		'content' => [
-			'title' => 'Content',
+		'conditional' => [
+			'title' => 'Conditional',
+		],
+		'text'        => [
+			'title' => 'Text',
+		],
+		'number'      => [
+			'title' => 'Number',
+		],
+		'media'       => [
+			'title' => 'Media',
+		],
+		'ui'          => [
+			'title' => 'UI',
+		],
+		'custom'      => [
+			'title' => 'Custom',
 		],
 	],
+	// Uncomment to use inner blocks.
+	//'template'      => [],
+	//'template_lock' => false,
 	'attributes'      => [
-		'verticalAlign'   => [
+		'verticalAlign'      => [
 			'type'    => 'string',
 			'toolbar' => 'BlockVerticalAlignmentToolbar',
 		],
-		'hideContentSetting'  => [
-			'type'    => 'boolean',
-			'default' => false,
-			'panel'   => 'content',
-			'control' => 'toggle',
-		],
-		'content' => [
+		'horizontalAlign'    => [
 			'type'    => 'string',
-			'default' => 'My block content',
-			'panel'   => 'content',
+			'toolbar' => 'BlockAlignmentToolbar',
+		],
+		'hideContentSetting' => [
+			'type'    => 'boolean',
+			'label'   => 'Hide content setting',
+			'control' => 'toggle',
+			'default' => false,
+			'panel'   => 'conditional',
+		],
+		'content'            => [
+			'type'    => 'string',
 			'control' => 'text',
+			'default' => 'My block content',
+			'panel'   => 'conditional',
 			'show_if' => [
 				[
 					'attribute' => 'hideContentSetting',
 					'operator'  => '!==',
 					'value'     => true,
+				],
+			],
+		],
+		'checkbox'           => [
+			'type'    => 'boolean',
+			'label'   => __( 'Checkbox', 'text-domain' ),
+			'control' => 'checkbox',
+			'panel'   => 'ui',
+		],
+		'number'             => [
+			'type'    => 'number',
+			'label'   => __( 'Number', 'text-domain' ),
+			'control' => 'number',
+			'panel'   => 'number',
+		],
+		'unit'               => [
+			'type'    => 'string',
+			'label'   => __( 'Unit', 'text-domain' ),
+			'control' => 'unit',
+			'panel'   => 'number',
+		],
+		'range'              => [
+			'type'    => 'number',
+			'label'   => __( 'Range', 'text-domain' ),
+			'control' => 'range',
+			'min'     => 0,
+			'max'     => 100,
+			'step'    => 1,
+			'panel'   => 'number',
+		],
+		'dropdown'           => [
+			'type'    => 'string',
+			'label'   => __( 'Dropdown', 'text-domain' ),
+			'control' => 'select',
+			'options' => [
+				[
+					'value' => 'option1',
+					'label' => 'Option 1',
+				],
+				[
+					'value' => 'option2',
+					'label' => 'Option 2',
+				],
+				[
+					'value' => 'option3',
+					'label' => 'Option 3',
+				],
+			],
+			'panel'   => 'ui',
+		],
+		'paragraphContent'   => [
+			'type'    => 'string',
+			'label'   => __( 'Paragraph content', 'text-domain' ),
+			'control' => 'textarea',
+			'panel'   => 'text',
+		],
+		'hiddenField'        => [
+			'type'    => 'string',
+			'label'   => __( 'Hidden field', 'text-domain' ),
+			'control' => 'hidden',
+			'panel'   => 'text',
+		],
+		'image'              => [
+			'type'    => 'string',
+			'label'   => __( 'Image picker', 'text-domain' ),
+			'control' => 'image',
+			'panel'   => 'media',
+		],
+		'youtubeUrl'         => [
+			'type'    => 'string',
+			'label'   => __( 'YouTube URL', 'text-domain' ),
+			'control' => 'embed',
+			'panel'   => 'media',
+		],
+		'galleryImages'      => [
+			'type'    => 'array',
+			'label'   => __( 'Gallery images', 'text-domain' ),
+			'control' => 'gallery',
+			'panel'   => 'media',
+		],
+		'iconPicker'         => [
+			'type'    => 'object',
+			'label'   => __( 'Select Icon', 'text-domain' ),
+			'control' => 'icon',
+			'panel'   => 'custom',
+		],
+		'colorOrGradient'    => [
+			'type'    => 'string',
+			'label'   => __( 'Color or Gradient', 'text-domain' ),
+			'control' => 'color',
+			'panel'   => 'ui',
+		],
+		'repeater'           => [
+			'type'      => 'array',
+			'label'     => __( 'Repeater', 'text-domain' ),
+			'control'   => 'repeater',
+			'panel'     => 'custom',
+			'subfields' => [
+				'item' => [
+					'type'    => 'string',
+					'label'   => __( 'Item', 'text-domain' ),
+					'control' => 'text',
 				],
 			],
 		],
