@@ -3,7 +3,7 @@
 declare( strict_types=1 );
 
 use Blockify\Utilities\Block;
-use Blockify\Utilities\Container;
+use Blockify\Utilities\Factories\ContainerFactory;
 use Blockify\Utilities\Icon;
 use Fieldify\Fields\Blocks;
 use Fieldify\Fields\Config;
@@ -31,8 +31,12 @@ if ( ! class_exists( 'Fieldify' ) ) {
 			static $configs = [];
 
 			if ( ! isset( $configs[ $file ] ) ) {
-				$container        = Container::instance( $file );
-				$configs[ $file ] = $container->make( Config::class, [ $file, $slug ] );
+				$container = ContainerFactory::create( $file );
+				$config    = $container->make( Config::class, [ $file, $slug ] );
+
+				$config->register( $container );
+
+				$configs[ $file ] = $config;
 			}
 
 			return $configs[ $file ];
