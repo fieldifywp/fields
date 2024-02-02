@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Fieldify\Fields;
 
+use Blockify\Utilities\Icon;
 use function array_values;
 use function file_exists;
 use function filemtime;
@@ -120,6 +121,19 @@ class Assets {
 				'settings'  => $this->settings->get_settings(),
 			]
 		);
+	}
+
+	/**
+	 * Registers icons rest route.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @hook  after_setup_theme
+	 *
+	 * @return void
+	 */
+	public function register_icons_rest_route(): void {
+		Icon::register_rest_route( $this->config->slug . '/v1' );
 	}
 
 }
