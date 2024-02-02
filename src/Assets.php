@@ -22,6 +22,11 @@ use function wp_register_style;
 class Assets {
 
 	/**
+	 * @var Config $config
+	 */
+	private Config $config;
+
+	/**
 	 * @var Blocks $blocks
 	 */
 	private Blocks $blocks;
@@ -41,11 +46,18 @@ class Assets {
 	 *
 	 * @since 0.0.14
 	 *
+	 * @param Config    $config     Config.
 	 * @param Blocks    $blocks     Blocks.
 	 * @param MetaBoxes $meta_boxes Meta boxes.
 	 * @param Settings  $settings   Settings.
 	 */
-	public function __construct( Blocks $blocks, MetaBoxes $meta_boxes, Settings $settings ) {
+	public function __construct(
+		Config    $config,
+		Blocks    $blocks,
+		MetaBoxes $meta_boxes,
+		Settings  $settings
+	) {
+		$this->config     = $config;
 		$this->blocks     = $blocks;
 		$this->meta_boxes = $meta_boxes;
 		$this->settings   = $settings;
@@ -56,20 +68,20 @@ class Assets {
 	 *
 	 * @since 0.0.14
 	 *
-	 * @hook  enqueue_block_editor_assets
+	 * @hook  enqueue_block_editor_assets 10
 	 *
 	 * @return void
 	 */
 	public function enqueue_editor_assets(): void {
-		$dir        = get_dir();
+		$dir        = $this->config->dir;
 		$asset_file = $dir . 'public/js/index.asset.php';
 
 		if ( ! file_exists( $asset_file ) ) {
 			return;
 		}
 
-		$slug = get_slug();
-		$uri  = get_uri();
+		$slug = $this->config->slug;
+		$uri  = $this->config->uri;
 
 		$style = [
 			'handle' => $slug,
@@ -101,6 +113,7 @@ class Assets {
 			$slug,
 			$slug,
 			[
+				'slug'      => $slug,
 				'postType'  => get_post_type(),
 				'blocks'    => $this->blocks->get_blocks(),
 				'metaBoxes' => $this->meta_boxes->get_meta_boxes(),

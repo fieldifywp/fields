@@ -14,6 +14,7 @@ use function esc_attr;
 use function filter_input;
 use function in_array;
 use function is_a;
+use function is_string;
 use function printf;
 use const FILTER_SANITIZE_FULL_SPECIAL_CHARS;
 use const INPUT_GET;
@@ -26,6 +27,26 @@ use const INPUT_GET;
 class MetaBoxes {
 
 	public const HOOK = 'fieldify_meta_boxes';
+
+	/**
+	 * Config.
+	 *
+	 * @var Config
+	 */
+	private Config $config;
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param Config $config Config.
+	 *
+	 * @return void
+	 */
+	public function __construct( Config $config ) {
+		$this->config = $config;
+	}
 
 	/**
 	 * Registers custom post meta.
@@ -49,8 +70,13 @@ class MetaBoxes {
 			$post_types = $meta_box['post_types'] ?? [ 'post' ];
 			$fields     = $meta_box['fields'] ?? [];
 
-			foreach ( $fields as $field ) {
-				$id     = $field['id'] ?? '';
+			foreach ( $fields as $id => $field ) {
+				$id = is_string( $id ) ? $id : ( $field['id'] ?? '' );
+
+				if ( ! $id ) {
+					continue;
+				}
+
 				$schema = $this->get_item_schema( $field );
 				$type   = $schema['type'];
 
@@ -140,6 +166,7 @@ class MetaBoxes {
 			$ids[]      = $id;
 			$title      = $meta_box['title'] ?? Str::title_case( $id );
 			$post_types = $meta_box['post_types'] ?? [ 'post' ];
+			$slug       = $this->config->slug;
 
 			foreach ( $post_types as $post_type ) {
 				if ( $current_post_type !== $post_type ) {
@@ -150,7 +177,8 @@ class MetaBoxes {
 					$id,
 					$title,
 					static fn() => printf(
-						'<div id="blockify-meta-box-%s" class="blockify-meta-box"></div>',
+						'<div id="%1$s-meta-box-%2$s" class="%1$s-meta-box"></div>',
+						$slug,
 						esc_attr( $id )
 					),
 					$post_type,
@@ -288,7 +316,7 @@ class MetaBoxes {
 			],
 		];
 
-		$field_type = $field['type'] ?? 'text';
+		$field_type = $field['control'] ?? 'text';
 		$schema     = $type_map[ $field_type ] ?? [ 'type' => 'string' ];
 		$sub_type   = $schema['items']['type'] ?? null;
 
