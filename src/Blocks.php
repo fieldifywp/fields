@@ -136,11 +136,12 @@ class Blocks {
 			$category = $block['category'] ?? null;
 
 			if ( $category && ! isset( $slugs[ $category ] ) ) {
-				$slugs[] = $category;
+				$title              = Str::title_case( $category );
+				$slugs[ $category ] = $title;
 
 				$block_categories[] = [
 					'slug'  => $category,
-					'title' => Str::title_case( $category ),
+					'title' => $title,
 				];
 			}
 		}
