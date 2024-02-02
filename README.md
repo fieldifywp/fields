@@ -117,17 +117,28 @@ the key and an array of options as the value.
 ### Meta Boxes
 
 ```php
+
 register_meta_box( 'my-meta-box', [
 	'title'      => 'My Meta Box',
 	'post_types' => [ 'post' ],
 	'context'    => 'side',
 	'priority'   => 'default',
 	'fields'     => [
-		[
-			'id'      => 'content',
+		'hideContentSetting' => [
+			'default' => false,
+			'control' => 'toggle',
+		],
+		'content' => [
 			'label'   => 'Content',
-			'type'    => 'text',
+			'control' => 'text',
 			'default' => 'My meta box content',
+			'show_if' => [
+				[
+					'field'    => 'hideContentSetting',
+					'operator' => '!==',
+					'value'    => true,
+				],
+			],
 		],
 	],
 ] );
