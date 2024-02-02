@@ -9,11 +9,13 @@ use function array_values;
 use function file_exists;
 use function filemtime;
 use function get_post_type;
+use function glob;
 use function wp_enqueue_script;
 use function wp_enqueue_style;
 use function wp_localize_script;
 use function wp_register_script;
 use function wp_register_style;
+use const GLOB_ONLYDIR;
 
 /**
  * Assets.
@@ -132,7 +134,14 @@ class Assets {
 	 *
 	 * @return void
 	 */
-	public function register_icons_rest_route(): void {
+	public function register_icons(): void {
+		$icon_sets = glob( $this->config->dir . 'public/icons/*', GLOB_ONLYDIR );
+
+		foreach ( $icon_sets as $icon_set ) {
+			$icon_set = basename( $icon_set );
+			Icon::register_icon_set( $icon_set, $this->config->dir . "public/icons/$icon_set" );
+		}
+
 		Icon::register_rest_route( $this->config->slug . '/v1' );
 	}
 
