@@ -6,8 +6,24 @@ namespace Fieldify\Fields;
 
 use function apply_filters;
 
-const SETTINGS_FILTER = 'fieldify_settings';
+/**
+ * Settings.
+ *
+ * @since 0.1.0
+ */
+class Settings {
 
-function get_settings(): array {
-	return apply_filters( SETTINGS_FILTER, [] );
+	public const HOOK = 'fieldify_settings';
+
+	/**
+	 * Get settings.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return array
+	 */
+	public function get_settings(): array {
+		return apply_filters( self::HOOK, [] );
+	}
+
 }
