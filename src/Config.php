@@ -81,11 +81,11 @@ final class Config implements Registerable {
 			Settings::class,
 		];
 
-		foreach ( $services as $service ) {
-			$instance = $container->make( $service );
+		foreach ( $services as $id ) {
+			$service = $container->make( $id );
 
-			if ( is_object( $instance ) ) {
-				Hook::annotations( $instance );
+			if ( is_object( $service ) ) {
+				Hook::annotations( $service );
 			}
 		}
 	}

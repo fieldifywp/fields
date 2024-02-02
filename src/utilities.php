@@ -20,7 +20,7 @@ if ( ! class_exists( 'Fieldify' ) ) {
 	class Fieldify {
 
 		/**
-		 * Registers a package.
+		 * Registers the package configuration.
 		 *
 		 * @param string $file Main plugin or theme file.
 		 * @param string $slug The package slug.
