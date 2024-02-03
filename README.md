@@ -328,7 +328,13 @@ https://developer.wordpress.org/block-editor/reference-guides/components/
 ### Utility functions
 
 - **register_block**: *string $id, array $args*
+	- Registers a block with the given id and options.
 - **register_meta_box**: *string $id, array $args*
+	- Registers a meta box with the given id and options.
 - **register_settings**: *string $id, array $args*
+	- Registers a settings panel with the given id and options.
 - **get_icon**: *string $set, string $name, $size = null*
-- **is_rendering_preview**
+	- Returns svg icon markup.
+- **block_is_rendering_preview**
+	- Used in block render callback to determine if block is being rendered in
+	  the editor preview. 

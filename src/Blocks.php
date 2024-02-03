@@ -29,6 +29,21 @@ class Blocks {
 	public const HOOK = 'fieldify_blocks';
 
 	/**
+	 * Registers a block.
+	 *
+	 * @param string $id   The block name.
+	 * @param array  $args The block arguments.
+	 *
+	 * @return void
+	 */
+	public static function register_block( string $id, array $args ): void {
+		add_filter(
+			Blocks::HOOK,
+			static fn( array $blocks ): array => array_merge( $blocks, [ $id => $args ] )
+		);
+	}
+
+	/**
 	 * Register blocks.
 	 *
 	 * @since 0.1.0

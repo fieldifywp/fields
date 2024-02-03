@@ -3,6 +3,7 @@
 declare( strict_types=1 );
 
 use Blockify\Utilities\Block;
+use Blockify\Utilities\Container;
 use Blockify\Utilities\Factories\ContainerFactory;
 use Blockify\Utilities\Icon;
 use Fieldify\Fields\Blocks;
@@ -31,8 +32,16 @@ if ( ! class_exists( 'Fieldify' ) ) {
 			static $configs = [];
 
 			if ( ! isset( $configs[ $file ] ) ) {
+
+				/**
+				 * @var Container $container
+				 */
 				$container = ContainerFactory::create( $file );
-				$config    = $container->make( Config::class, [ $file, $slug ] );
+
+				/**
+				 * @var Config $config
+				 */
+				$config = $container->make( Config::class, [ $file, $slug ] );
 
 				$config->register( $container );
 
@@ -40,53 +49,6 @@ if ( ! class_exists( 'Fieldify' ) ) {
 			}
 
 			return $configs[ $file ];
-		}
-
-		/**
-		 * Registers a block.
-		 *
-		 * @param string $id   The block name.
-		 * @param array  $args The block arguments.
-		 *
-		 * @return void
-		 */
-		public static function register_block( string $id, array $args ): void {
-			add_filter(
-				Blocks::HOOK,
-				static fn( array $blocks ): array => array_merge( $blocks, [ $id => $args ] )
-			);
-		}
-
-		/**
-		 * Registers a meta box.
-		 *
-		 * @param string $id   The meta box ID.
-		 * @param array  $args The meta box arguments.
-		 *
-		 * @return void
-		 */
-		public static function register_meta_box( string $id, array $args ): void {
-			$args['id'] = $id;
-
-			add_filter(
-				MetaBoxes::HOOK,
-				static fn( array $meta_boxes ): array => array_merge( $meta_boxes, [ $args ] )
-			);
-		}
-
-		/**
-		 * Registers settings.
-		 *
-		 * @param string $id       The settings ID.
-		 * @param array  $settings The settings.
-		 *
-		 * @return void
-		 */
-		public static function register_settings( string $id, array $settings ): void {
-			add_filter(
-				Settings::HOOK,
-				static fn( array $registered_settings ): array => array_merge( $registered_settings, [ $id => $settings ] )
-			);
 		}
 	}
 }
@@ -102,7 +64,7 @@ if ( ! function_exists( 'register_block' ) ) {
 	 * @return void
 	 */
 	function register_block( string $id, array $args ): void {
-		Fieldify::register_block( $id, $args );
+		Blocks::register_block( $id, $args );
 	}
 }
 
@@ -117,7 +79,7 @@ if ( ! function_exists( 'register_meta_box' ) ) {
 	 * @return void
 	 */
 	function register_meta_box( string $id, array $args ): void {
-		Fieldify::register_meta_box( $id, $args );
+		MetaBoxes::register_meta_box( $id, $args );
 	}
 }
 
@@ -132,7 +94,7 @@ if ( ! function_exists( 'register_settings' ) ) {
 	 * @return void
 	 */
 	function register_settings( string $id, array $args ): void {
-		Fieldify::register_settings( $id, $args );
+		Settings::register_settings( $id, $args );
 	}
 }
 
@@ -154,14 +116,14 @@ if ( ! function_exists( 'get_icon' ) ) {
 	}
 }
 
-if ( ! function_exists( 'is_rendering_preview' ) ) {
+if ( ! function_exists( 'block_is_rendering_preview' ) ) {
 
 	/**
 	 * Checks if a block is currently rendering in the editor.
 	 *
 	 * @return bool
 	 */
-	function is_rendering_preview(): bool {
+	function block_is_rendering_preview(): bool {
 		return Block::is_rendering_preview();
 	}
 }

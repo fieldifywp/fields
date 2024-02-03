@@ -49,6 +49,23 @@ class MetaBoxes {
 	}
 
 	/**
+	 * Registers a meta box.
+	 *
+	 * @param string $id   The meta box ID.
+	 * @param array  $args The meta box arguments.
+	 *
+	 * @return void
+	 */
+	public static function register_meta_box( string $id, array $args ): void {
+		$args['id'] = $id;
+
+		add_filter(
+			MetaBoxes::HOOK,
+			static fn( array $meta_boxes ): array => array_merge( $meta_boxes, [ $args ] )
+		);
+	}
+
+	/**
 	 * Registers custom post meta.
 	 *
 	 * @hook after_setup_theme

@@ -7,15 +7,8 @@ namespace Fieldify\Fields;
 use Blockify\Utilities\Container;
 use Blockify\Utilities\Hook;
 use Blockify\Utilities\Interfaces\Registerable;
-use function basename;
-use function content_url;
-use function dirname;
-use function implode;
+use Blockify\Utilities\Package;
 use function is_object;
-use function str_replace;
-use function trailingslashit;
-use const DIRECTORY_SEPARATOR;
-use const WP_CONTENT_DIR;
 
 /**
  * Config class.
@@ -73,8 +66,8 @@ class Config implements Registerable {
 	 * @return void
 	 */
 	public function __construct( string $file, string $slug = self::SLUG ) {
-		$this->dir  = $this->get_dir( $file, __DIR__ );
-		$this->uri  = str_replace( WP_CONTENT_DIR, content_url(), $this->dir );
+		$this->dir  = Package::dir( $file, __DIR__ );
+		$this->uri  = Package::uri( $this->dir );
 		$this->slug = $slug;
 	}
 
@@ -94,32 +87,4 @@ class Config implements Registerable {
 			}
 		}
 	}
-
-	/**
-	 * Returns the package directory path.
-	 *
-	 * @param string $file Main plugin or theme file.
-	 * @param string $src  Package src directory.
-	 *
-	 * @return string
-	 */
-	private function get_dir( string $file, string $src ): string {
-		return trailingslashit(
-			implode(
-				DIRECTORY_SEPARATOR,
-				[
-					dirname( $file ),
-					implode(
-						DIRECTORY_SEPARATOR,
-						[
-							basename( dirname( $src, 3 ) ),
-							basename( dirname( $src, 2 ) ),
-							basename( dirname( $src, 1 ) ),
-						]
-					),
-				]
-			)
-		);
-	}
-
 }
