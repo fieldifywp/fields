@@ -4,7 +4,7 @@ declare( strict_types=1 );
 
 namespace Fieldify\Fields;
 
-use Blockify\Utilities\Package;
+use Blockify\Utilities\Path;
 
 /**
  * Config class.
@@ -21,11 +21,11 @@ class Config {
 	public string $dir;
 
 	/**
-	 * Package URI.
+	 * Package URL.
 	 *
 	 * @var string
 	 */
-	public string $uri;
+	public string $url;
 
 	/**
 	 * Custom slug.
@@ -43,8 +43,8 @@ class Config {
 	 * @return void
 	 */
 	public function __construct( string $file, string $slug ) {
-		$this->dir  = Package::dir( $file, __DIR__ );
-		$this->uri  = Package::uri( $this->dir );
+		$this->dir  = Path::get_package_dir( $file, __DIR__ );
+		$this->url  = Path::get_package_url( $this->dir );
 		$this->slug = $slug;
 	}
 

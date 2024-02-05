@@ -84,7 +84,7 @@ class Assets {
 		}
 
 		$slug = $this->config->slug;
-		$uri  = $this->config->uri;
+		$uri  = $this->config->url;
 
 		$style = [
 			'handle' => $slug,
