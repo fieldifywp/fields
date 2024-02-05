@@ -4,25 +4,14 @@ declare( strict_types=1 );
 
 namespace Fieldify\Fields;
 
-use Blockify\Utilities\Container;
-use Blockify\Utilities\Hook;
-use Blockify\Utilities\Interfaces\Registerable;
 use Blockify\Utilities\Package;
-use function is_object;
 
 /**
  * Config class.
  *
  * @since 1.0.0
  */
-class Config implements Registerable {
-
-	/**
-	 * Default package slug.
-	 *
-	 * @var string
-	 */
-	public const SLUG = 'fieldify';
+class Config {
 
 	/**
 	 * Package directory.
@@ -46,18 +35,6 @@ class Config implements Registerable {
 	public string $slug;
 
 	/**
-	 * Services.
-	 *
-	 * @var array
-	 */
-	private array $services = [
-		Assets::class,
-		Blocks::class,
-		MetaBoxes::class,
-		Settings::class,
-	];
-
-	/**
 	 * Config constructor.
 	 *
 	 * @param string $file Plugin or theme directory.
@@ -65,26 +42,10 @@ class Config implements Registerable {
 	 *
 	 * @return void
 	 */
-	public function __construct( string $file, string $slug = self::SLUG ) {
+	public function __construct( string $file, string $slug ) {
 		$this->dir  = Package::dir( $file, __DIR__ );
 		$this->uri  = Package::uri( $this->dir );
 		$this->slug = $slug;
 	}
 
-	/**
-	 * Register services.
-	 *
-	 * @param Container $container Container.
-	 *
-	 * @return void
-	 */
-	public function register( Container $container ): void {
-		foreach ( $this->services as $id ) {
-			$service = $container->make( $id );
-
-			if ( is_object( $service ) ) {
-				Hook::annotations( $service );
-			}
-		}
-	}
 }
