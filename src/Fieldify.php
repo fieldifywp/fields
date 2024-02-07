@@ -8,7 +8,9 @@ use Fieldify\Fields\Assets;
 use Fieldify\Fields\Blocks;
 use Fieldify\Fields\Config;
 use Fieldify\Fields\MetaBoxes;
+use Fieldify\Fields\PostTypes;
 use Fieldify\Fields\Settings;
+use Fieldify\Fields\Taxonomies;
 
 if ( ! class_exists( 'Fieldify' ) ) {
 
@@ -30,7 +32,9 @@ if ( ! class_exists( 'Fieldify' ) ) {
 			Assets::class,
 			Blocks::class,
 			MetaBoxes::class,
+			PostTypes::class,
 			Settings::class,
+			Taxonomies::class,
 		];
 
 		/**
@@ -76,18 +80,22 @@ if ( ! class_exists( 'Fieldify' ) ) {
 		/**
 		 * Magic method to call the register method statically.
 		 *
-		 * @param string $method    Method name.
-		 * @param array  $arguments Method arguments.
+		 * @param string $method Method name.
+		 * @param array  $args   Method arguments.
 		 *
 		 * @return void
 		 */
-		public static function __callStatic( string $method, array $arguments ): void {
+		public static function __callStatic( string $method, array $args ): void {
+			if ( ! method_exists( static::class, $method ) ) {
+				throw new BadMethodCallException( self::class . '::' . $method . ' does not exist.' );
+			}
+
 			if ( $method !== 'register' ) {
 				throw new BadMethodCallException( self::class . '::' . $method . ' can not be called statically.' );
 			}
 
-			$static = new static( $arguments[0], $arguments[1] ?? null );
-			$static->register( $arguments[0], $arguments[1] ?? null );
+			$static = new static( ...$args );
+			$static->$method( ...$args );
 		}
 	}
 }

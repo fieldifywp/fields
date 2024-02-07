@@ -25,7 +25,7 @@ class Settings {
 	 */
 	public static function register_settings( string $id, array $settings ): void {
 		add_filter(
-			Settings::HOOK,
+			static::HOOK,
 			static fn( array $registered_settings ): array => array_merge( $registered_settings, [ $id => $settings ] )
 		);
 	}

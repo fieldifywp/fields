@@ -5,6 +5,7 @@ declare( strict_types=1 );
 namespace Fieldify\Fields;
 
 use Blockify\Utilities\Path;
+use function dirname;
 
 /**
  * Config class.
@@ -43,7 +44,7 @@ class Config {
 	 * @return void
 	 */
 	public function __construct( string $file, string $slug ) {
-		$this->dir  = Path::get_package_dir( $file, __DIR__ );
+		$this->dir  = Path::get_package_dir( $file, dirname( __DIR__ ) );
 		$this->url  = Path::get_package_url( $this->dir );
 		$this->slug = $slug;
 	}

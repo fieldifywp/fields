@@ -6,7 +6,9 @@ use Blockify\Utilities\Block;
 use Blockify\Utilities\Icon;
 use Fieldify\Fields\Blocks;
 use Fieldify\Fields\MetaBoxes;
+use Fieldify\Fields\PostTypes;
 use Fieldify\Fields\Settings;
+use Fieldify\Fields\Taxonomies;
 
 if ( ! function_exists( 'register_block' ) ) {
 
@@ -20,6 +22,37 @@ if ( ! function_exists( 'register_block' ) ) {
 	 */
 	function register_block( string $id, array $args ): void {
 		Blocks::register_block( $id, $args );
+	}
+}
+
+if ( ! function_exists( 'register_custom_post_type' ) ) {
+
+	/**
+	 * Registers a custom post type.
+	 *
+	 * @param string $id   The post type ID.
+	 * @param array  $args The post type arguments.
+	 *
+	 * @return void
+	 */
+	function register_custom_post_type( string $id, array $args ): void {
+		PostTypes::register_post_type( $id, $args );
+	}
+}
+
+if ( ! function_exists( 'register_custom_taxonomy' ) ) {
+
+	/**
+	 * Registers a custom taxonomy.
+	 *
+	 * @param string       $id        The taxonomy ID.
+	 * @param string|array $post_type Post type string or array of strings.
+	 * @param array        $args      The taxonomy arguments.
+	 *
+	 * @return void
+	 */
+	function register_custom_taxonomy( string $id, $post_type, array $args ): void {
+		Taxonomies::register_taxonomy( $id, $post_type, $args );
 	}
 }
 

@@ -60,7 +60,7 @@ class MetaBoxes {
 		$args['id'] = $id;
 
 		add_filter(
-			MetaBoxes::HOOK,
+			static::HOOK,
 			static fn( array $meta_boxes ): array => array_merge( $meta_boxes, [ $args ] )
 		);
 	}
