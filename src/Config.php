@@ -44,9 +44,11 @@ class Config {
 	 * @return void
 	 */
 	public function __construct( string $file, string $slug ) {
-		$this->dir  = Path::get_package_dir( $file, dirname( __DIR__ ) );
-		$this->url  = Path::get_package_url( $this->dir );
-		$this->slug = $slug;
+		$project_dir = dirname( $file );
+		$package_dir = dirname( __DIR__ );
+		$this->dir   = Path::get_package_dir( $project_dir, $package_dir );
+		$this->url   = Path::get_package_url( $project_dir, $package_dir );
+		$this->slug  = $slug;
 	}
 
 }

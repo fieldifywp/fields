@@ -55,13 +55,13 @@ if ( ! class_exists( 'Fieldify' ) ) {
 		 * @param string  $file Main plugin or theme file.
 		 * @param ?string $slug The package slug.
 		 *
-		 * @return void
+		 * @return self
 		 */
-		protected function register( string $file, ?string $slug = null ): void {
+		protected function register( string $file, ?string $slug = null ): self {
 			static $instances = [];
 
 			if ( isset( $instances[ $file ] ) ) {
-				return;
+				return $this;
 			}
 
 			$instances[ $file ] = true;
@@ -75,6 +75,8 @@ if ( ! class_exists( 'Fieldify' ) ) {
 					Hook::annotations( $service );
 				}
 			}
+
+			return $this;
 		}
 
 		/**
@@ -83,9 +85,9 @@ if ( ! class_exists( 'Fieldify' ) ) {
 		 * @param string $method Method name.
 		 * @param array  $args   Method arguments.
 		 *
-		 * @return void
+		 * @return self
 		 */
-		public static function __callStatic( string $method, array $args ): void {
+		public static function __callStatic( string $method, array $args ): self {
 			if ( ! method_exists( static::class, $method ) ) {
 				throw new BadMethodCallException( self::class . '::' . $method . ' does not exist.' );
 			}
@@ -95,7 +97,8 @@ if ( ! class_exists( 'Fieldify' ) ) {
 			}
 
 			$static = new static( ...$args );
-			$static->$method( ...$args );
+
+			return $static->register( ...$args );
 		}
 	}
 }

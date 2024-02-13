@@ -8,6 +8,8 @@ use Blockify\Utilities\Icon;
 use function array_values;
 use function file_exists;
 use function filemtime;
+use function function_exists;
+use function get_current_screen;
 use function get_post_type;
 use function glob;
 use function wp_enqueue_script;
@@ -108,6 +110,8 @@ class Assets {
 			'in_footer' => true,
 		];
 
+		$current_screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
 		wp_register_script( ...array_values( $script ) );
 
 		wp_enqueue_script( $slug );
@@ -116,11 +120,12 @@ class Assets {
 			$slug,
 			$slug,
 			[
-				'slug'      => $slug,
-				'postType'  => get_post_type(),
-				'blocks'    => $this->blocks->get_blocks(),
-				'metaBoxes' => $this->meta_boxes->get_meta_boxes(),
-				'settings'  => $this->settings->get_settings(),
+				'slug'       => $slug,
+				'postType'   => get_post_type(),
+				'siteEditor' => $current_screen && $current_screen->base === 'site-editor',
+				'blocks'     => $this->blocks->get_blocks(),
+				'metaBoxes'  => $this->meta_boxes->get_meta_boxes(),
+				'settings'   => $this->settings->get_settings(),
 			]
 		);
 	}
