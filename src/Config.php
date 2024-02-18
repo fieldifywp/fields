@@ -5,9 +5,7 @@ declare( strict_types=1 );
 namespace Fieldify\Fields;
 
 use Blockify\Utilities\Path;
-use function basename;
 use function dirname;
-use function strtolower;
 
 /**
  * Config class.
@@ -35,7 +33,7 @@ class Config {
 	 *
 	 * @var string
 	 */
-	public string $slug;
+	public string $slug = 'fieldify';
 
 	/**
 	 * Config constructor.
@@ -49,7 +47,6 @@ class Config {
 		$package_dir = dirname( __DIR__ );
 		$this->dir   = Path::get_package_dir( $project_dir, $package_dir );
 		$this->url   = Path::get_package_url( $project_dir, $package_dir );
-		$this->slug  = strtolower( basename( dirname( $file ), '.php' ) );
 	}
 
 }

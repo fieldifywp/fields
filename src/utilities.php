@@ -10,7 +10,7 @@ use Fieldify\Fields\PostTypes;
 use Fieldify\Fields\Settings;
 use Fieldify\Fields\Taxonomies;
 
-if ( ! function_exists( 'register_block' ) ) {
+if ( ! function_exists( 'register_custom_block' ) ) {
 
 	/**
 	 * Registers a block.
@@ -20,7 +20,7 @@ if ( ! function_exists( 'register_block' ) ) {
 	 *
 	 * @return void
 	 */
-	function register_block( string $id, array $args ): void {
+	function register_custom_block( string $id, array $args ): void {
 		Blocks::register_block( $id, $args );
 	}
 }
@@ -56,7 +56,7 @@ if ( ! function_exists( 'register_custom_taxonomy' ) ) {
 	}
 }
 
-if ( ! function_exists( 'register_meta_box' ) ) {
+if ( ! function_exists( 'register_custom_meta_box' ) ) {
 
 	/**
 	 * Registers a meta box.
@@ -66,12 +66,12 @@ if ( ! function_exists( 'register_meta_box' ) ) {
 	 *
 	 * @return void
 	 */
-	function register_meta_box( string $id, array $args ): void {
+	function register_custom_meta_box( string $id, array $args ): void {
 		MetaBoxes::register_meta_box( $id, $args );
 	}
 }
 
-if ( ! function_exists( 'register_settings' ) ) {
+if ( ! function_exists( 'register_custom_settings' ) ) {
 
 	/**
 	 * Registers settings.
@@ -81,7 +81,7 @@ if ( ! function_exists( 'register_settings' ) ) {
 	 *
 	 * @return void
 	 */
-	function register_settings( string $id, array $args ): void {
+	function register_custom_settings( string $id, array $args ): void {
 		Settings::register_settings( $id, $args );
 	}
 }

@@ -9,6 +9,7 @@ use WP_Comment;
 use WP_Post;
 use function add_meta_box;
 use function apply_filters;
+use function array_key_exists;
 use function array_merge;
 use function esc_attr;
 use function filter_input;
@@ -57,11 +58,12 @@ class MetaBoxes {
 	 * @return void
 	 */
 	public static function register_meta_box( string $id, array $args ): void {
-		$args['id'] = $id;
-
 		add_filter(
 			static::HOOK,
-			static fn( array $meta_boxes ): array => array_merge( $meta_boxes, [ $args ] )
+			static fn( array $meta_boxes ): array => array_merge(
+				$meta_boxes,
+				[ $id => $args ]
+			)
 		);
 	}
 
@@ -88,12 +90,6 @@ class MetaBoxes {
 			$fields     = $meta_box['fields'] ?? [];
 
 			foreach ( $fields as $id => $field ) {
-				$id = is_string( $id ) ? $id : ( $field['id'] ?? '' );
-
-				if ( ! $id ) {
-					continue;
-				}
-
 				$schema = $this->get_item_schema( $field );
 				$type   = $schema['type'];
 
@@ -141,10 +137,8 @@ class MetaBoxes {
 		foreach ( $meta_boxes as $meta_box ) {
 			$fields = $meta_box['fields'] ?? [];
 
-			foreach ( $fields as $field ) {
-				$id = $field['id'] ?? '';
-
-				if ( $id === $meta_key ) {
+			foreach ( $fields as $field_id => $field ) {
+				if ( $field_id === $meta_key ) {
 					return true;
 				}
 			}
@@ -166,24 +160,16 @@ class MetaBoxes {
 	public function add_custom_meta_boxes( string $current_post_type, $object ): void {
 
 		// TODO: Add support for comments, users and terms.
-		if ( ! is_a( $object, 'WP_Post' ) ) {
+		if ( ! is_a( $object, WP_Post::class ) ) {
 			return;
 		}
 
 		$meta_boxes = $this->get_meta_boxes();
-		$ids        = [];
 
-		foreach ( $meta_boxes as $meta_box ) {
-			$id = $meta_box['id'] ?? '';
-
-			if ( in_array( $id, $ids, true ) ) {
-				continue;
-			}
-
-			$ids[]      = $id;
+		foreach ( $meta_boxes as $id => $meta_box ) {
+			$slug       = $this->config->slug;
 			$title      = $meta_box['title'] ?? Str::title_case( $id );
 			$post_types = $meta_box['post_types'] ?? [ 'post' ];
-			$slug       = $this->config->slug;
 
 			foreach ( $post_types as $post_type ) {
 				if ( $current_post_type !== $post_type ) {
@@ -212,34 +198,44 @@ class MetaBoxes {
 	 *
 	 * @since 0.5.2
 	 *
-	 * @return array
+	 * @return array <string, array> Meta boxes.
 	 */
 	public function get_meta_boxes(): array {
-		return apply_filters( self::HOOK, [] );
-	}
+		$meta_boxes = apply_filters( self::HOOK, [] );
+		$formatted  = [];
 
-	/**
-	 * Returns array of custom fields.
-	 *
-	 * @since 0.5.2
-	 *
-	 * @param ?string $post_type Post type.
-	 *
-	 * @return array
-	 */
-	private function get_custom_fields( ?string $post_type = null ): array {
-		$meta_boxes = $this->get_meta_boxes();
-		$fields     = [];
+		foreach ( $meta_boxes as $id => $meta_box ) {
+			$id = is_string( $id ) ? $id : ( $field['id'] ?? '' );
 
-		foreach ( $meta_boxes as $meta_box ) {
-			if ( $post_type && ! in_array( $post_type, $meta_box['post_types'] ?? [], true ) ) {
+			if ( ! $id ) {
 				continue;
 			}
 
-			$fields = array_merge( $fields, $meta_box['fields'] ?? [] );
+			if ( array_key_exists( $id, $formatted ) ) {
+				continue;
+			}
+
+			$fields             = $meta_box['fields'] ?? [];
+			$meta_box['fields'] = [];
+
+			foreach ( $fields as $field_id => $field ) {
+				$field_id = is_string( $field_id ) ? $field_id : ( $field['id'] ?? '' );
+
+				if ( ! $field_id ) {
+					continue;
+				}
+
+				if ( array_key_exists( $field_id, $meta_box['fields'] ) ) {
+					continue;
+				}
+
+				$meta_box['fields'][ $field_id ] = $field;
+			}
+
+			$formatted[ $id ] = $meta_box;
 		}
 
-		return $fields;
+		return $formatted;
 	}
 
 	/**

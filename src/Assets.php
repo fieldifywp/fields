@@ -116,9 +116,9 @@ class Assets {
 
 		wp_localize_script(
 			$slug,
-			'fieldify',
+			$slug,
 			[
-				'slug'       => esc_html( $slug ),
+				'slug'       => $slug,
 				'postType'   => esc_html( get_post_type() ),
 				'siteEditor' => $current_screen && $current_screen->base === 'site-editor',
 				'blocks'     => $this->blocks->get_blocks(),

@@ -57,7 +57,7 @@ format: `namespace/my-block`.
 
 ```php
 
-register_block( 'namespace/my-block', [
+register_custom_block( 'namespace/my-block', [
 	'title'           => __( 'My Block', 'text-domain' ),
 	'description'     => __( 'My custom block', 'text-domain' ),
 	'category'        => 'custom',
@@ -248,7 +248,7 @@ the key and an array of options as the value.
 
 ```php
 
-register_meta_box( 'my-meta-box', [
+register_custom_meta_box( 'my-meta-box', [
 	'title'      => 'My Meta Box',
 	'post_types' => [ 'post' ],
 	'context'    => 'side',
@@ -282,7 +282,7 @@ key and an array of options as the value.
 ### Settings
 
 ```php
-register_settings('my-settings', [
+register_custom_settings('my-settings', [
 	'title' => 'My Settings',
 	'fields' => [
 		'content' => [
