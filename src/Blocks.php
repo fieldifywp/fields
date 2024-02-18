@@ -175,7 +175,7 @@ class Blocks {
 	 *
 	 * @param array $block_categories The block categories.
 	 *
-	 * @hook block_categories_all
+	 * @hook block_categories_all 11
 	 *
 	 * @return array
 	 */

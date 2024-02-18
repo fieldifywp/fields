@@ -18,17 +18,15 @@ if ( ! class_exists( 'Fieldify' ) ) {
 	 * Fieldify service provider.
 	 *
 	 * @since 1.0.0
-	 *
-	 * @method static void register( string $file, ?string $slug = null )
 	 */
-	class Fieldify extends Container {
+	class Fieldify {
 
 		/**
 		 * Services.
 		 *
 		 * @var array
 		 */
-		private array $services = [
+		private static array $services = [
 			Assets::class,
 			Blocks::class,
 			MetaBoxes::class,
@@ -40,65 +38,41 @@ if ( ! class_exists( 'Fieldify' ) ) {
 		/**
 		 * Constructor.
 		 *
-		 * @param string  $file Main plugin or theme file.
-		 * @param ?string $slug The package slug.
+		 * @param string $file Main plugin or theme file.
 		 *
 		 * @return void
 		 */
-		public function __construct( string $file, ?string $slug = null ) {
-			$this->register( $file, $slug );
+		public function __construct( string $file ) {
+			self::register( $file );
 		}
 
 		/**
-		 * Registers services.
+		 * Registers instance.
 		 *
-		 * @param string  $file Main plugin or theme file.
-		 * @param ?string $slug The package slug.
+		 * @param string $file Main plugin or theme file.
 		 *
-		 * @return self
+		 * @return Container
 		 */
-		protected function register( string $file, ?string $slug = null ): self {
+		public static function register( string $file ): Container {
 			static $instances = [];
 
-			if ( isset( $instances[ $file ] ) ) {
-				return $this;
-			}
+			if ( ! isset( $instances[ $file ] ) ) {
+				$container = new Container();
 
-			$instances[ $file ] = true;
+				$container->make( Config::class, $file );
 
-			$this->make( Config::class, [ $file, $slug ?? strtolower( static::class ) ] );
+				foreach ( static::$services as $id ) {
+					$service = $container->make( $id );
 
-			foreach ( $this->services as $id ) {
-				$service = $this->make( $id );
-
-				if ( is_object( $service ) ) {
-					Hook::annotations( $service );
+					if ( is_object( $service ) ) {
+						Hook::annotations( $service );
+					}
 				}
+
+				$instances[ $file ] = $container;
 			}
 
-			return $this;
-		}
-
-		/**
-		 * Magic method to call the register method statically.
-		 *
-		 * @param string $method Method name.
-		 * @param array  $args   Method arguments.
-		 *
-		 * @return self
-		 */
-		public static function __callStatic( string $method, array $args ): self {
-			if ( ! method_exists( static::class, $method ) ) {
-				throw new BadMethodCallException( self::class . '::' . $method . ' does not exist.' );
-			}
-
-			if ( $method !== 'register' ) {
-				throw new BadMethodCallException( self::class . '::' . $method . ' can not be called statically.' );
-			}
-
-			$static = new static( ...$args );
-
-			return $static->register( ...$args );
+			return $instances[ $file ];
 		}
 	}
 }

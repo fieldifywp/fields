@@ -5,13 +5,15 @@ declare( strict_types=1 );
 namespace Fieldify\Fields;
 
 use Blockify\Utilities\Icon;
+use RuntimeException;
 use function array_values;
-use function file_exists;
+use function esc_html;
 use function filemtime;
 use function function_exists;
 use function get_current_screen;
 use function get_post_type;
 use function glob;
+use function is_readable;
 use function wp_enqueue_script;
 use function wp_enqueue_style;
 use function wp_localize_script;
@@ -71,7 +73,9 @@ class Assets {
 	/**
 	 * Enqueues editor assets.
 	 *
-	 * @since 0.0.14
+	 * @since 1.0.0
+	 *
+	 * @throws RuntimeException If asset file is not readable.
 	 *
 	 * @hook  enqueue_block_editor_assets 10
 	 *
@@ -81,47 +85,41 @@ class Assets {
 		$dir        = $this->config->dir;
 		$asset_file = $dir . 'public/js/index.asset.php';
 
-		if ( ! file_exists( $asset_file ) ) {
-			return;
+		if ( ! is_readable( $asset_file ) ) {
+			throw new RuntimeException( static::class . ' asset file is not readable.' );
 		}
 
-		$slug = $this->config->slug;
-		$uri  = $this->config->url;
+		$asset          = require $asset_file;
+		$slug           = $this->config->slug;
+		$url            = $this->config->url;
+		$current_screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 
-		$style = [
+		wp_register_style( ...array_values( [
 			'handle' => $slug,
-			'src'    => $uri . 'public/css/index.css',
+			'src'    => $url . 'public/css/index.css',
 			'deps'   => [],
 			'ver'    => filemtime( $dir . 'public/css/index.css' ),
 			'media'  => 'all',
-		];
-
-		wp_register_style( ...array_values( $style ) );
+		] ) );
 
 		wp_enqueue_style( $slug );
 
-		$asset = require $asset_file;
-
-		$script = [
+		wp_register_script( ...array_values( [
 			'handle'    => $slug,
-			'src'       => $uri . 'public/js/index.js',
+			'src'       => $url . 'public/js/index.js',
 			'deps'      => $asset['dependencies'] ?? [],
 			'ver'       => $asset['version'] ?? filemtime( $dir . 'public/js/index.js' ),
 			'in_footer' => true,
-		];
-
-		$current_screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-
-		wp_register_script( ...array_values( $script ) );
+		] ) );
 
 		wp_enqueue_script( $slug );
 
 		wp_localize_script(
 			$slug,
-			$slug,
+			'fieldify',
 			[
-				'slug'       => $slug,
-				'postType'   => get_post_type(),
+				'slug'       => esc_html( $slug ),
+				'postType'   => esc_html( get_post_type() ),
 				'siteEditor' => $current_screen && $current_screen->base === 'site-editor',
 				'blocks'     => $this->blocks->get_blocks(),
 				'metaBoxes'  => $this->meta_boxes->get_meta_boxes(),
@@ -144,10 +142,11 @@ class Assets {
 
 		foreach ( $icon_sets as $icon_set ) {
 			$icon_set = basename( $icon_set );
+
 			Icon::register_icon_set( $icon_set, $this->config->dir . "public/icons/$icon_set" );
 		}
 
-		Icon::register_rest_route( $this->config->slug . '/v1' );
+		Icon::register_rest_route( 'fieldify/v1' );
 	}
 
 }
