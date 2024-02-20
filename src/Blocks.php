@@ -12,6 +12,7 @@ use function array_replace;
 use function dirname;
 use function file_exists;
 use function filemtime;
+use function in_array;
 use function is_string;
 use function register_block_type;
 use function str_replace;
@@ -25,7 +26,9 @@ use function wp_list_pluck;
  */
 class Blocks {
 
-	public const HOOK = 'fieldify_blocks';
+	public const  HOOK = 'fieldify_blocks';
+
+	private const DEFAULT_CATEGORY = 'custom';
 
 	/**
 	 * Project directory.
@@ -102,9 +105,19 @@ class Blocks {
 			if ( $file && file_exists( $file ) ) {
 
 				if ( ! empty( $args ) ) {
-					register_block_type( $file, [
-						'render_callback' => $args['render_callback'] ?? null,
-					] );
+					$custom_args = [];
+
+					if ( isset( $args['render_callback'] ) ) {
+						$custom_args['render_callback'] = $args['render_callback'];
+					}
+
+					$category = $args['category'] ?? '';
+
+					if ( $category && $category !== self::DEFAULT_CATEGORY ) {
+						$custom_args['category'] = $category;
+					}
+
+					register_block_type( $file, $custom_args );
 				} else {
 					register_block_type( $file );
 				}
@@ -186,7 +199,7 @@ class Blocks {
 		foreach ( $blocks as $block ) {
 			$category = $block['category'] ?? null;
 
-			if ( $category && ! isset( $slugs[ $category ] ) ) {
+			if ( $category && ! in_array( $category, $slugs ) && ! isset( $slugs[ $category ] ) ) {
 				$title              = Str::title_case( $category );
 				$slugs[ $category ] = $title;
 
@@ -215,7 +228,7 @@ class Blocks {
 				'apiVersion' => 2,
 				'name'       => $name,
 				'title'      => Str::title_case( $name ),
-				'category'   => 'custom',
+				'category'   => self::DEFAULT_CATEGORY,
 				'attributes' => [],
 				'enabled'    => true,
 			];

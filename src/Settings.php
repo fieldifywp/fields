@@ -38,7 +38,24 @@ class Settings {
 	 * @return array
 	 */
 	public function get_settings(): array {
-		return apply_filters( self::HOOK, [] );
+		$settings  = apply_filters( self::HOOK, [] );
+		$formatted = [];
+
+		foreach ( $settings as $id => $args ) {
+			$panels = $args['panels'] ?? [];
+
+			foreach ( $panels as $panel_id => $panel ) {
+				$panel['initialOpen'] = $panel['initial_open'] ?? false;
+
+				unset( $panel['initial_open'] );
+
+				$args['panels'][ $panel_id ] = $panel;
+			}
+
+			$formatted[ $id ] = $args;
+		}
+
+		return $formatted;
 	}
 
 }
