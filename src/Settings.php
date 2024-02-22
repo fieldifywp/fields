@@ -4,7 +4,11 @@ declare( strict_types=1 );
 
 namespace Fieldify\Fields;
 
+use Blockify\Utilities\Str;
+use function add_filter;
 use function apply_filters;
+use function array_merge;
+use function register_setting;
 
 /**
  * Settings.
@@ -14,6 +18,24 @@ use function apply_filters;
 class Settings {
 
 	public const HOOK = 'fieldify_settings';
+
+	/**
+	 * Meta boxes.
+	 *
+	 * @var MetaBoxes
+	 */
+	private MetaBoxes $meta_boxes;
+
+	/**
+	 * Meta boxes.
+	 *
+	 * @param MetaBoxes $meta_boxes Meta boxes.
+	 *
+	 * @return void
+	 */
+	public function __construct( MetaBoxes $meta_boxes ) {
+		$this->meta_boxes = $meta_boxes;
+	}
 
 	/**
 	 * Registers settings.
@@ -56,6 +78,45 @@ class Settings {
 		}
 
 		return $formatted;
+	}
+
+	/**
+	 * Register rest settings.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @hook  admin_init
+	 * @hook  rest_api_init
+	 *
+	 * @return void
+	 */
+	public function register_rest_setting(): void {
+		$settings = $this->get_settings();
+
+		foreach ( $settings as $id => $args ) {
+			$fields = [];
+
+			foreach ( $args['fields'] as $field_id => $field ) {
+				$fields[ $field_id ] = [
+					'type' => $this->meta_boxes->get_item_schema( $field )['type'] ?? 'string',
+				];
+			}
+
+			register_setting(
+				'options',
+				$id,
+				[
+					'description'  => $args['title'] ?? Str::title_case( $id ),
+					'type'         => 'object',
+					'show_in_rest' => [
+						'schema' => [
+							'type'       => 'object',
+							'properties' => $fields ?? [],
+						],
+					],
+				]
+			);
+		}
 	}
 
 }

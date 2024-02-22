@@ -245,7 +245,7 @@ class MetaBoxes {
 	 *
 	 * @return array
 	 */
-	private function get_item_schema( array $field ): array {
+	public function get_item_schema( array $field ): array {
 		$type_map = [
 			'text'     => [
 				'type' => 'string',
@@ -329,7 +329,7 @@ class MetaBoxes {
 			],
 		];
 
-		$field_type = $field['control'] ?? 'text';
+		$field_type = $field['control'] ?? $field['type'] ?? 'text';
 		$schema     = $type_map[ $field_type ] ?? [ 'type' => 'string' ];
 		$sub_type   = $schema['items']['type'] ?? null;
 
