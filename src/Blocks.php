@@ -9,11 +9,12 @@ use Blockify\Utilities\Str;
 use function add_action;
 use function apply_filters;
 use function array_replace;
+use function content_url;
 use function dirname;
 use function file_exists;
 use function filemtime;
+use function get_template_directory;
 use function in_array;
-use function is_string;
 use function register_block_type;
 use function str_replace;
 use function wp_enqueue_block_style;
@@ -92,94 +93,7 @@ class Blocks {
 		$blocks = $this->get_blocks();
 
 		foreach ( $blocks as $name => $args ) {
-			$enabled = $args['enabled'] ?? true;
-
-			if ( ! $enabled ) {
-				continue;
-			}
-
-			$file = $args['file'] ?? '';
-
-			unset ( $args['file'] );
-
-			if ( $file && file_exists( $file ) ) {
-
-				if ( ! empty( $args ) ) {
-					$custom_args = [];
-
-					if ( isset( $args['render_callback'] ) ) {
-						$custom_args['render_callback'] = $args['render_callback'];
-					}
-
-					$category = $args['category'] ?? '';
-
-					if ( $category && $category !== self::DEFAULT_CATEGORY ) {
-						$custom_args['category'] = $category;
-					}
-
-					register_block_type( $file, $custom_args );
-				} else {
-					register_block_type( $file );
-				}
-			} else {
-				register_block_type( $name, $args );
-			}
-
-			$style       = $args['style'] ?? '';
-			$project_dir = $this->project_dir;
-			$project_url = $this->project_url;
-
-			if ( $style ) {
-				$path = $project_dir . $style;
-
-				if ( file_exists( $path ) ) {
-					wp_enqueue_block_style(
-						$name,
-						[
-							'handle' => str_replace( '/', '-', $name ),
-							'src'    => $project_url . $style,
-							'path'   => $path,
-							'ver'    => filemtime( $path ),
-						]
-					);
-				}
-			}
-
-			$view_script = $args['view_script'] ?? '';
-
-			if ( $view_script && is_string( $view_script ) ) {
-				add_action(
-					'wp_enqueue_scripts',
-					static function () use ( $name, $view_script, $project_dir, $project_url ): void {
-						$path = $project_dir . $view_script;
-						$src  = $project_url . $view_script;
-
-						if ( ! file_exists( $path ) ) {
-							return;
-						}
-
-						$base      = basename( $path );
-						$dir       = dirname( $path );
-						$asset_php = "$dir/asset.php";
-						$version   = null;
-						$deps      = null;
-
-						if ( file_exists( $asset_php ) ) {
-							$asset   = require $asset_php;
-							$version = $asset['version'] ?? null;
-							$deps    = $asset['dependencies'] ?? null;
-						}
-
-						wp_enqueue_script(
-							$name,
-							$src,
-							$deps ?? [],
-							$version ?? filemtime( $path ),
-							true
-						);
-					}
-				);
-			}
+			$this->register_block_from_args( $name, $args );
 		}
 	}
 
@@ -265,6 +179,186 @@ class Blocks {
 		}
 
 		return $src;
+	}
+
+	/**
+	 * Registers a block from given arguments.
+	 *
+	 * @param string $name The block name.
+	 * @param array  $args The block arguments.
+	 *
+	 * @return void
+	 */
+	private function register_block_from_args( string $name, array $args ): void {
+		$enabled = $args['enabled'] ?? true;
+
+		if ( ! $enabled ) {
+			return;
+		}
+
+		$file = $args['file'] ?? '';
+
+		unset ( $args['file'] );
+
+		if ( $file && file_exists( $file ) ) {
+			if ( ! empty( $args ) ) {
+				$custom_args = [];
+
+				if ( isset( $args['render_callback'] ) ) {
+					$custom_args['render_callback'] = $args['render_callback'];
+				}
+
+				$category = $args['category'] ?? '';
+
+				if ( $category && $category !== self::DEFAULT_CATEGORY ) {
+					$custom_args['category'] = $category;
+				}
+
+				register_block_type( $file, $custom_args );
+			} else {
+				register_block_type( $file );
+			}
+		} else {
+			register_block_type( $name, $args );
+		}
+
+		$this->enqueue_block_style( $name, $args );
+		$this->enqueue_view_script( $name, $args );
+	}
+
+	/**
+	 * Enqueues block style.
+	 *
+	 * @param string $name The block name.
+	 * @param array  $args The block arguments.
+	 *
+	 * @return void
+	 */
+	private function enqueue_block_style( string $name, array $args ): void {
+		$style = $args['style'] ?? '';
+
+		if ( ! $style ) {
+			return;
+		}
+
+		$path = $this->get_asset_path( $style );
+
+		if ( ! $path ) {
+			return;
+		}
+
+		$src = $this->get_asset_src( $style );
+
+		wp_enqueue_block_style(
+			$name,
+			[
+				'handle' => str_replace( '/', '-', $name ),
+				'src'    => $src,
+				'path'   => $path,
+				'ver'    => filemtime( $path ),
+			]
+		);
+	}
+
+	/**
+	 * Enqueues block view script.
+	 *
+	 * @param string $name The block name.
+	 * @param array  $args The block arguments.
+	 *
+	 * @return void
+	 */
+	private function enqueue_view_script( string $name, array $args ): void {
+		$script = $args['view_script'] ?? '';
+
+		if ( ! $script ) {
+			return;
+		}
+
+		$path = $this->get_asset_path( $script );
+
+		if ( ! $path ) {
+			return;
+		}
+
+		$src      = $this->get_asset_src( $script );
+		$instance = $this;
+
+		add_action(
+			'wp_enqueue_scripts',
+			static fn() => $instance->view_script_callback( $name, $path, $src )
+		);
+	}
+
+	/**
+	 * Returns asset path.
+	 *
+	 * @param string $asset The asset path.
+	 *
+	 * @return string
+	 */
+	private function get_asset_path( string $asset ): string {
+		$content_dir = dirname( get_template_directory(), 2 );
+		$content_url = content_url();
+		$is_relative = ! Str::contains_any( $asset, $content_dir, $content_url );
+
+		if ( $is_relative ) {
+			$path = $this->project_dir . $asset;
+		} else {
+			$path = str_replace( $content_url, $content_dir, $asset );
+		}
+
+		return file_exists( $path ) ? $path : '';
+	}
+
+	/**
+	 * Returns asset src.
+	 *
+	 * @param string $asset The asset path.
+	 *
+	 * @return string
+	 */
+	private function get_asset_src( string $asset ): string {
+		$content_dir = dirname( get_template_directory(), 2 );
+		$content_url = content_url();
+		$is_relative = ! Str::contains_any( $asset, $content_dir, $content_url );
+
+		if ( $is_relative ) {
+			return $this->project_url . $asset;
+		} else {
+			return str_replace( $content_dir, $content_url, $asset );
+		}
+	}
+
+	/**
+	 * Callback for enqueuing view script.
+	 *
+	 * @param string $name The block name.
+	 * @param string $path The view script path.
+	 * @param string $src  The view script URL.
+	 *
+	 * @return void
+	 */
+	private function view_script_callback( string $name, string $path, string $src ): void {
+		$base      = basename( $path );
+		$dir       = dirname( $path );
+		$asset_php = "$dir/asset.php";
+		$version   = null;
+		$deps      = null;
+
+		if ( file_exists( $asset_php ) ) {
+			$asset   = require $asset_php;
+			$version = $asset['version'] ?? null;
+			$deps    = $asset['dependencies'] ?? null;
+		}
+
+		wp_enqueue_script(
+			$name,
+			$src,
+			$deps ?? [],
+			$version ?? filemtime( $path ),
+			true
+		);
 	}
 
 }

@@ -86,7 +86,7 @@ class Assets {
 		$asset_file = $dir . 'public/js/index.asset.php';
 
 		if ( ! is_readable( $asset_file ) ) {
-			throw new RuntimeException( static::class . ' asset file is not readable.' );
+			throw new RuntimeException( static::class . ' asset file is not readable. File path: ' . $asset_file );
 		}
 
 		$asset          = require $asset_file;
