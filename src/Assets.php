@@ -126,6 +126,9 @@ class Assets {
 				'settings'   => $this->settings->get_settings(),
 			]
 		);
+
+		// Enqueue CodeMirror assets.
+		wp_enqueue_style( 'wp-codemirror' );
 	}
 
 	/**
