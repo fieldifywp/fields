@@ -327,6 +327,12 @@ class MetaBoxes {
 					'type' => 'object',
 				],
 			],
+			'license'  => [
+				'type' => 'string',
+			],
+			'code'     => [
+				'type' => 'string',
+			],
 		];
 
 		$field_type = $field['control'] ?? $field['type'] ?? 'text';

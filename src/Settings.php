@@ -96,9 +96,9 @@ class Settings {
 		foreach ( $settings as $id => $args ) {
 			$fields = [];
 
-			foreach ( $args['fields'] as $field_id => $field ) {
-				$fields[ $field_id ] = [
-					'type' => $this->meta_boxes->get_item_schema( $field )['type'] ?? 'string',
+			foreach ( ( $args['fields'] ?? [] ) as $field_id => $field ) {
+				$fields[ $field_id ] = $this->meta_boxes->get_item_schema( $field ) ?? [
+					'type' => 'string',
 				];
 			}
 
