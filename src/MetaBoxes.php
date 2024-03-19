@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Fieldify\Fields;
 
+use Blockify\Utilities\Arr;
 use Blockify\Utilities\Str;
 use WP_Comment;
 use WP_Post;
@@ -218,6 +219,7 @@ class MetaBoxes {
 			$fields             = $meta_box['fields'] ?? [];
 			$meta_box['fields'] = [];
 
+			// Format field args.
 			foreach ( $fields as $field_id => $field ) {
 				$field_id = is_string( $field_id ) ? $field_id : ( $field['id'] ?? '' );
 
@@ -229,7 +231,25 @@ class MetaBoxes {
 					continue;
 				}
 
-				$meta_box['fields'][ $field_id ] = $field;
+				$field = $this->replace_condition_key( $field );
+
+				$subfields = $field['subfields'] ?? [];
+
+				if ( $subfields ) {
+
+					// Correct subfield IDs.
+					foreach ( $subfields as $sub_id => $subfield ) {
+						$sub_id = is_string( $sub_id ) ? $sub_id : ( $field['id'] ?? '' );
+
+						if ( ! $sub_id ) {
+							continue;
+						}
+
+						$field['subfields'][ $sub_id ] = $subfield;
+					}
+				}
+
+				$meta_box['fields'][ $field_id ] = Arr::keys_to_camel_case( $field );
 			}
 
 			$formatted[ $id ] = $meta_box;
@@ -348,5 +368,37 @@ class MetaBoxes {
 		}
 
 		return $schema;
+	}
+
+	/**
+	 * Replace show if condition.
+	 *
+	 * @param array  $field Field data.
+	 * @param string $key   Field key.
+	 *
+	 * @return array
+	 */
+	public function replace_condition_key( array $field, string $key = 'field' ): array {
+		$show_if = $field['show_if'] ?? [];
+
+		if ( empty( $show_if ) ) {
+			return $field;
+		}
+
+		foreach ( $show_if as $show_if_field ) {
+			$show_if_field['condition'] = $show_if_field[ $key ] ?? '';
+
+			unset( $show_if_field[ $key ] );
+		}
+
+		$subfields = $field['subfields'] ?? [];
+
+		if ( $subfields ) {
+			foreach ( $subfields as $sub_id => $subfield ) {
+				$field['subfields'][ $sub_id ] = $this->replace_condition_key( $subfield );
+			}
+		}
+
+		return $field;
 	}
 }

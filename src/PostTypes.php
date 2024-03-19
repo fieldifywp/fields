@@ -30,11 +30,11 @@ class PostTypes {
 	 * Registers a taxonomy.
 	 *
 	 * @param string $id   Name.
-	 * @param array  $args Arguments.
+	 * @param array  $args (Optional). Arguments.
 	 *
 	 * @return void
 	 */
-	public static function register_post_type( string $id, array $args ): void {
+	public static function register_post_type( string $id, array $args = [] ): void {
 		add_filter(
 			static::HOOK,
 			static fn( array $post_types ): array => array_merge( $post_types, [ $id => $args ] )
@@ -44,7 +44,7 @@ class PostTypes {
 	/**
 	 * Registers post types.
 	 *
-	 * @hook init 0
+	 * @hook init 11
 	 *
 	 * @return void
 	 */

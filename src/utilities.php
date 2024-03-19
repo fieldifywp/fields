@@ -31,11 +31,11 @@ if ( ! function_exists( 'register_custom_post_type' ) ) {
 	 * Registers a custom post type.
 	 *
 	 * @param string $id   The post type ID.
-	 * @param array  $args The post type arguments.
+	 * @param array  $args (Optional). The post type arguments.
 	 *
 	 * @return void
 	 */
-	function register_custom_post_type( string $id, array $args ): void {
+	function register_custom_post_type( string $id, array $args = [] ): void {
 		PostTypes::register_post_type( $id, $args );
 	}
 }

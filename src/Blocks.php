@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Fieldify\Fields;
 
+use Blockify\Utilities\Arr;
 use Blockify\Utilities\Path;
 use Blockify\Utilities\Str;
 use function add_action;
@@ -53,16 +54,24 @@ class Blocks {
 	private string $package_dir;
 
 	/**
+	 * Meta boxes.
+	 *
+	 * @var MetaBoxes
+	 */
+	private MetaBoxes $meta_boxes;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param Config $config The package configuration.
 	 *
 	 * @return void
 	 */
-	public function __construct( Config $config ) {
+	public function __construct( Config $config, MetaBoxes $meta_boxes ) {
 		$this->project_dir = Path::get_project_dir( $config->dir );
 		$this->project_url = Path::get_project_url( $this->project_dir );
 		$this->package_dir = $config->dir;
+		$this->meta_boxes  = $meta_boxes;
 	}
 
 	/**
@@ -146,6 +155,16 @@ class Blocks {
 				'attributes' => [],
 				'enabled'    => true,
 			];
+
+			$attrs = $args['attributes'] ?? [];
+
+			if ( $attrs ) {
+				foreach ( $attrs as $attr_key => $attribute ) {
+					$args['attributes'][ $attr_key ] = $this->meta_boxes->replace_condition_key( $attribute, 'attribute' );
+				}
+			}
+
+			$args = Arr::keys_to_camel_case( $args );
 
 			$blocks[ $name ] = array_replace( $defaults, $args );
 		}

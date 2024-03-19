@@ -74,6 +74,12 @@ class Settings {
 				$args['panels'][ $panel_id ] = $panel;
 			}
 
+			$fields = $args['fields'] ?? [];
+
+			foreach ( $fields as $field_id => $field ) {
+				$args['fields'][ $field_id ] = $this->meta_boxes->replace_condition_key( $field, 'setting' );
+			}
+
 			$formatted[ $id ] = $args;
 		}
 
