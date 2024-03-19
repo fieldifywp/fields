@@ -114,18 +114,21 @@ class Assets {
 
 		wp_enqueue_script( $slug );
 
-		wp_localize_script(
-			$slug,
-			$slug,
-			[
-				'slug'       => $slug,
-				'postType'   => esc_html( get_post_type() ),
-				'siteEditor' => $current_screen && $current_screen->base === 'site-editor',
-				'blocks'     => $this->blocks->get_blocks(),
-				'metaBoxes'  => $this->meta_boxes->get_meta_boxes(),
-				'settings'   => $this->settings->get_settings(),
-			]
-		);
+		$args = [
+			'slug'       => $slug,
+			'postType'   => esc_html( get_post_type() ),
+			'siteEditor' => $current_screen && $current_screen->base === 'site-editor',
+			'blocks'     => $this->blocks->get_blocks(),
+			'settings'   => $this->settings->get_settings(),
+		];
+
+		$meta_boxes = $this->meta_boxes->get_meta_boxes();
+
+		if ( ! empty( $meta_boxes ) ) {
+			$args['metaBoxes'] = $meta_boxes;
+		}
+
+		wp_localize_script( $slug, $slug, $args );
 
 		// Enqueue CodeMirror assets.
 		wp_enqueue_style( 'wp-codemirror' );

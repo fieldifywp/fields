@@ -6,6 +6,7 @@ namespace Fieldify\Fields;
 
 use Blockify\Utilities\Arr;
 use Blockify\Utilities\Str;
+use InvalidArgumentException;
 use WP_Comment;
 use WP_Post;
 use function add_meta_box;
@@ -16,6 +17,8 @@ use function esc_attr;
 use function filter_input;
 use function in_array;
 use function is_a;
+use function is_array;
+use function is_null;
 use function is_string;
 use function printf;
 use const FILTER_SANITIZE_FULL_SPECIAL_CHARS;
@@ -78,6 +81,10 @@ class MetaBoxes {
 	public function register_custom_post_meta(): void {
 		$meta_boxes = $this->get_meta_boxes();
 
+		if ( empty( $meta_boxes ) ) {
+			return;
+		}
+
 		$defaults = [
 			'string'  => '',
 			'number'  => 0,
@@ -135,6 +142,10 @@ class MetaBoxes {
 
 		$meta_boxes = $this->get_meta_boxes();
 
+		if ( empty( $meta_boxes ) ) {
+			return $protected;
+		}
+
 		foreach ( $meta_boxes as $meta_box ) {
 			$fields = $meta_box['fields'] ?? [];
 
@@ -166,6 +177,10 @@ class MetaBoxes {
 		}
 
 		$meta_boxes = $this->get_meta_boxes();
+
+		if ( empty( $meta_boxes ) ) {
+			return;
+		}
 
 		foreach ( $meta_boxes as $id => $meta_box ) {
 			$slug       = $this->config->slug;
@@ -199,11 +214,22 @@ class MetaBoxes {
 	 *
 	 * @since 0.5.2
 	 *
+	 * @throws InvalidArgumentException If meta boxes are not an array.
+	 *
 	 * @return array <string, array> Meta boxes.
 	 */
 	public function get_meta_boxes(): array {
 		$meta_boxes = apply_filters( self::HOOK, [] );
-		$formatted  = [];
+
+		if ( empty( $meta_boxes ) ) {
+			return [];
+		}
+
+		if ( ! is_array( $meta_boxes ) ) {
+			throw new InvalidArgumentException( 'Meta box config must be array.' );
+		}
+
+		$formatted = [];
 
 		foreach ( $meta_boxes as $id => $meta_box ) {
 			$id = is_string( $id ) ? $id : ( $field['id'] ?? '' );
@@ -223,7 +249,7 @@ class MetaBoxes {
 			foreach ( $fields as $field_id => $field ) {
 				$field_id = is_string( $field_id ) ? $field_id : ( $field['id'] ?? '' );
 
-				if ( ! $field_id ) {
+				if ( is_null( $field_id ) ) {
 					continue;
 				}
 
@@ -231,25 +257,10 @@ class MetaBoxes {
 					continue;
 				}
 
+				$field = Arr::keys_to_camel_case( $field );
 				$field = $this->replace_condition_key( $field );
 
-				$subfields = $field['subfields'] ?? [];
-
-				if ( $subfields ) {
-
-					// Correct subfield IDs.
-					foreach ( $subfields as $sub_id => $subfield ) {
-						$sub_id = is_string( $sub_id ) ? $sub_id : ( $field['id'] ?? '' );
-
-						if ( ! $sub_id ) {
-							continue;
-						}
-
-						$field['subfields'][ $sub_id ] = $subfield;
-					}
-				}
-
-				$meta_box['fields'][ $field_id ] = Arr::keys_to_camel_case( $field );
+				$meta_box['fields'][ $field_id ] = $field;
 			}
 
 			$formatted[ $id ] = $meta_box;
@@ -379,16 +390,14 @@ class MetaBoxes {
 	 * @return array
 	 */
 	public function replace_condition_key( array $field, string $key = 'field' ): array {
-		$show_if = $field['show_if'] ?? [];
+		$show_if = $field['showIf'] ?? [];
 
-		if ( empty( $show_if ) ) {
-			return $field;
-		}
+		if ( ! empty( $show_if ) ) {
+			foreach ( $show_if as $show_if_index => $show_if_field ) {
+				$field['showIf'][ $show_if_index ]['condition'] = $show_if_field[ $key ] ?? '';
 
-		foreach ( $show_if as $show_if_field ) {
-			$show_if_field['condition'] = $show_if_field[ $key ] ?? '';
-
-			unset( $show_if_field[ $key ] );
+				unset( $field['showIf'][ $show_if_index ][ $key ] );
+			}
 		}
 
 		$subfields = $field['subfields'] ?? [];
@@ -397,6 +406,33 @@ class MetaBoxes {
 			foreach ( $subfields as $sub_id => $subfield ) {
 				$field['subfields'][ $sub_id ] = $this->replace_condition_key( $subfield );
 			}
+		}
+
+		return $field;
+	}
+
+	/**
+	 * Correct subfield IDs.
+	 *
+	 * @param array $field Field data.
+	 *
+	 * @return array
+	 */
+	private function replace_field_ids( array $field ): array {
+		$subfields = $field['subfields'] ?? [];
+
+		if ( ! $subfields ) {
+			return $field;
+		}
+
+		foreach ( $subfields as $sub_id => $subfield ) {
+			$sub_id = is_string( $sub_id ) ? $sub_id : ( $field['id'] ?? '' );
+
+			if ( is_null( $sub_id ) ) {
+				continue;
+			}
+
+			$field['subfields'][ $sub_id ] = $this->replace_field_ids( $subfield );
 		}
 
 		return $field;
