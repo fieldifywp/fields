@@ -186,8 +186,8 @@ class Blocks {
 	 */
 	public function replace_src( string $src ): string {
 		$search         = 'plugins' . dirname( __DIR__, 3 );
-		$project_parent = Path::get_segments( $this->package_dir, -5 );
-		$vendor_dir     = Path::get_segments( $project_parent, 3 );
+		$project_parent = Path::get_segment( $this->package_dir, -5 );
+		$vendor_dir     = Path::get_segment( $project_parent, 3 );
 
 		if ( Str::contains_all( $src, $search, '/blocks/' ) ) {
 			$src = str_replace(
