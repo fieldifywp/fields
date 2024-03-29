@@ -99,7 +99,7 @@ class Blocks {
 	 * @return void
 	 */
 	public function register_blocks(): void {
-		$blocks = $this->get_blocks();
+		$blocks = $this->get_blocks( false );
 
 		foreach ( $blocks as $name => $args ) {
 			$this->register_block_from_args( $name, $args );
@@ -141,9 +141,11 @@ class Blocks {
 	 *
 	 * @since 1.0.0
 	 *
+	 * @param bool $camel_case Whether to convert keys to camel case.
+	 *
 	 * @return array
 	 */
-	public function get_blocks(): array {
+	public function get_blocks( $camel_case = true ): array {
 		$blocks = apply_filters( self::HOOK, [] );
 
 		foreach ( $blocks as $name => $args ) {
@@ -164,7 +166,9 @@ class Blocks {
 				}
 			}
 
-			$args = Arr::keys_to_camel_case( $args );
+			if ( $camel_case ) {
+				$args = Arr::keys_to_camel_case( $args );
+			}
 
 			$blocks[ $name ] = array_replace( $defaults, $args );
 		}
