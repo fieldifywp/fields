@@ -145,7 +145,7 @@ class Blocks {
 	 *
 	 * @return array
 	 */
-	public function get_blocks( $camel_case = true ): array {
+	public function get_blocks( bool $camel_case = true ): array {
 		$blocks = apply_filters( self::HOOK, [] );
 
 		foreach ( $blocks as $name => $args ) {

@@ -74,7 +74,7 @@ class MetaBoxes {
 	/**
 	 * Registers custom post meta.
 	 *
-	 * @hook after_setup_theme
+	 * @hook after_setup_theme 11
 	 *
 	 * @return void
 	 */
@@ -108,6 +108,10 @@ class MetaBoxes {
 					'single'       => true,
 					'show_in_rest' => true,
 				];
+
+				if ( $field['sanitize_callback'] ?? null ) {
+					$args['sanitize_callback'] = $field['sanitize_callback'];
+				}
 
 				if ( in_array( $type, [ 'array', 'object' ], true ) ) {
 					$args['show_in_rest'] = [
