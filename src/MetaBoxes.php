@@ -13,6 +13,7 @@ use function add_meta_box;
 use function apply_filters;
 use function array_key_exists;
 use function array_merge;
+use function current_user_can;
 use function esc_attr;
 use function filter_input;
 use function in_array;
@@ -102,11 +103,12 @@ class MetaBoxes {
 				$type   = $schema['type'];
 
 				$args = [
-					'type'         => $type,
-					'description'  => $field['label'] ?? Str::title_case( $id ),
-					'default'      => $field['default'] ?? $defaults[ $type ] ?? null,
-					'single'       => true,
-					'show_in_rest' => true,
+					'type'          => $type,
+					'description'   => $field['label'] ?? Str::title_case( $id ),
+					'default'       => $field['default'] ?? $defaults[ $type ] ?? null,
+					'single'        => true,
+					'show_in_rest'  => true,
+					'auth_callback' => static fn(): bool => current_user_can( 'manage_options' ),
 				];
 
 				if ( $field['sanitize_callback'] ?? null ) {
