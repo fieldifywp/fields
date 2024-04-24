@@ -11,6 +11,7 @@ use function add_filter;
 use function apply_filters;
 use function array_merge;
 use function esc_html;
+use function in_array;
 use function is_array;
 use function is_callable;
 use function is_string;
@@ -52,6 +53,12 @@ class PostTypes {
 		$post_types = $this->get_custom_post_types();
 
 		foreach ( $post_types as $post_type => $args ) {
+			$supports = $args['supports'] ?? [];
+
+			if ( ! in_array( 'custom-fields', $supports, true ) ) {
+				$supports[] = 'custom-fields';
+			}
+
 			register_post_type( $post_type, $args );
 		}
 	}
@@ -139,6 +146,7 @@ class PostTypes {
 				'filter_items_list'     => __( 'Filter ', 'fieldify' ) . $plural . __( ' list', 'fieldify' ),
 			];
 
+			// Note: Custom field support is required for meta fields to work.
 			$defaults = [
 				'label'               => $plural,
 				'description'         => $plural . __( ' Description', 'fieldify' ),
