@@ -4,9 +4,9 @@ declare( strict_types=1 );
 
 namespace Fieldify\Fields;
 
-use Blockify\Utilities\Container;
-use Blockify\Utilities\Hook;
-use Blockify\Utilities\Interfaces\Registerable;
+use Blockify\Container\Container;
+use Blockify\Container\Interfaces\Registerable;
+use Blockify\Hooks\Hook;
 
 /**
  * Service provider.

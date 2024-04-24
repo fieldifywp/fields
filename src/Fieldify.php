@@ -2,7 +2,7 @@
 
 declare( strict_types=1 );
 
-use Blockify\Utilities\Container;
+use Blockify\Container\Container;
 use Fieldify\Fields\ServiceProvider;
 
 if ( ! class_exists( 'Fieldify' ) ) {
