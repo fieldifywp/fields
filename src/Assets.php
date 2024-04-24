@@ -4,7 +4,7 @@ declare( strict_types=1 );
 
 namespace Fieldify\Fields;
 
-use Blockify\Utilities\Icon;
+use Blockify\Icons\Icon;
 use RuntimeException;
 use function array_values;
 use function esc_html;

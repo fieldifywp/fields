@@ -2,8 +2,8 @@
 
 declare( strict_types=1 );
 
+use Blockify\Icons\Icon;
 use Blockify\Utilities\Block;
-use Blockify\Utilities\Icon;
 use Fieldify\Fields\Blocks;
 use Fieldify\Fields\MetaBoxes;
 use Fieldify\Fields\PostTypes;
