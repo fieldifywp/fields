@@ -379,8 +379,8 @@ class MetaBoxes {
 		if ( $sub_type === 'object' ) {
 			$sub_fields = $field['subfields'] ?? [];
 
-			foreach ( $sub_fields as $sub_field ) {
-				$schema['items']['properties'][ $sub_field['id'] ?? '' ] = $this->get_item_schema( $sub_field );
+			foreach ( $sub_fields as $sub_field_id => $sub_field ) {
+				$schema['items']['properties'][ $sub_field_id ?? $sub_field['id'] ?? '' ] = $this->get_item_schema( $sub_field );
 			}
 		}
 
