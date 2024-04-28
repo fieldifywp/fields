@@ -111,8 +111,8 @@ class MetaBoxes {
 					'auth_callback' => static fn(): bool => current_user_can( 'manage_options' ),
 				];
 
-				if ( $field['sanitize_callback'] ?? null ) {
-					$args['sanitize_callback'] = $field['sanitize_callback'];
+				if ( $field['sanitizeCallback'] ?? null ) {
+					$args['sanitize_callback'] = $field['sanitizeCallback'];
 				}
 
 				if ( in_array( $type, [ 'array', 'object' ], true ) ) {
