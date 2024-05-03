@@ -370,6 +370,17 @@ class MetaBoxes {
 			'code'     => [
 				'type' => 'string',
 			],
+			'post'     => [
+				'type'       => 'object',
+				'properties' => [
+					'value' => [
+						'type' => 'number',
+					],
+					'label' => [
+						'type' => 'string',
+					],
+				],
+			],
 		];
 
 		$field_type = $field['control'] ?? $field['type'] ?? 'text';
