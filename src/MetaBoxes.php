@@ -365,7 +365,15 @@ class MetaBoxes {
 				],
 			],
 			'license'  => [
-				'type' => 'string',
+				'type'       => 'object',
+				'properties' => [
+					'license'       => [
+						'type' => 'string',
+					],
+					'licenseStatus' => [
+						'type' => 'string',
+					],
+				],
 			],
 			'code'     => [
 				'type' => 'string',
