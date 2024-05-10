@@ -78,6 +78,23 @@ class Settings {
 
 			foreach ( $fields as $field_id => $field ) {
 				$args['fields'][ $field_id ] = $this->meta_boxes->replace_condition_key( $field, 'setting' );
+
+				if ( isset( $field['show_if'] ) ) {
+					$args['fields'][ $field_id ]['showIf'] = $field['show_if'];
+					$field['showIf']                       = $field['show_if'];
+
+					unset( $args['fields'][ $field_id ]['show_if'] );
+				}
+
+				if ( ! empty( $field['showIf'] ?? [] ) ) {
+					foreach ( $field['showIf'] as $index => $showIf ) {
+						if ( isset( $showIf['setting'] ) ) {
+							$args['fields'][ $field_id ]['showIf'][ $index ]['condition'] = $showIf['setting'];
+
+							unset( $args['fields'][ $field_id ]['showIf'][ $index ]['setting'] );
+						}
+					}
+				}
 			}
 
 			$formatted[ $id ] = $args;
