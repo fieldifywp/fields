@@ -255,10 +255,12 @@ class MetaBoxes {
 			foreach ( $fields as $field_id => $field ) {
 				$field_id = is_string( $field_id ) ? $field_id : ( $field['id'] ?? '' );
 
+				// ID could not be found.
 				if ( is_null( $field_id ) ) {
 					continue;
 				}
 
+				// Remove duplicate fields.
 				if ( array_key_exists( $field_id, $meta_box['fields'] ) ) {
 					continue;
 				}
@@ -407,7 +409,9 @@ class MetaBoxes {
 	}
 
 	/**
-	 * Replace show if condition.
+	 * Replace show if condition keys.
+	 *
+	 * React expects the condition key to be `condition` instead of `field`.
 	 *
 	 * @param array  $field Field data.
 	 * @param string $key   Field key.
@@ -438,6 +442,8 @@ class MetaBoxes {
 
 	/**
 	 * Correct subfield IDs.
+	 *
+	 * Backwards compatibility for indexed subfields using ID key.
 	 *
 	 * @param array $field Field data.
 	 *
