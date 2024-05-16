@@ -2,7 +2,7 @@
 
 declare( strict_types=1 );
 
-use Blockify\Container\Container;
+use Blockify\Container\ContainerFactory;
 use Blockify\Hooks\Hook;
 use Fieldify\Fields\Assets;
 use Fieldify\Fields\Blocks;
@@ -17,7 +17,7 @@ use Fieldify\Fields\Taxonomies;
  *
  * @since 1.0.0
  */
-class Fieldify {
+final class Fieldify {
 
 	/**
 	 * Services.
@@ -47,7 +47,7 @@ class Fieldify {
 			return;
 		}
 
-		$container = new Container();
+		$container = ContainerFactory::create( self::class );
 
 		$container->make( Config::class, $file );
 
