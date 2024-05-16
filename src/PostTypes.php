@@ -15,6 +15,7 @@ use function in_array;
 use function is_array;
 use function is_callable;
 use function is_string;
+use function post_type_exists;
 use function register_post_type;
 use function wp_parse_args;
 
@@ -53,10 +54,17 @@ class PostTypes {
 		$post_types = $this->get_custom_post_types();
 
 		foreach ( $post_types as $post_type => $args ) {
+			if ( post_type_exists( $post_type ) ) {
+				continue;
+			}
+
 			$supports = $args['supports'] ?? [];
 
+			// Custom fields are required for meta to save.
 			if ( ! in_array( 'custom-fields', $supports, true ) ) {
 				$supports[] = 'custom-fields';
+
+				$args['supports'] = $supports;
 			}
 
 			register_post_type( $post_type, $args );
