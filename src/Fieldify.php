@@ -3,23 +3,37 @@
 declare( strict_types=1 );
 
 use Blockify\Container\Container;
-use Fieldify\Fields\ServiceProvider;
+use Blockify\Hooks\Hook;
+use Fieldify\Fields\Assets;
+use Fieldify\Fields\Blocks;
+use Fieldify\Fields\Config;
+use Fieldify\Fields\MetaBoxes;
+use Fieldify\Fields\PostTypes;
+use Fieldify\Fields\Settings;
+use Fieldify\Fields\Taxonomies;
 
 if ( ! class_exists( 'Fieldify' ) ) {
 
 	/**
-	 * Fieldify registry.
+	 * Fieldify facade.
 	 *
 	 * @since 1.0.0
 	 */
 	class Fieldify {
 
 		/**
-		 * Service provider instances.
+		 * Services.
 		 *
-		 * @var array <string, ServiceProvider>
+		 * @var array
 		 */
-		private static array $providers = [];
+		private const SERVICES = [
+			Assets::class,
+			Blocks::class,
+			MetaBoxes::class,
+			PostTypes::class,
+			Settings::class,
+			Taxonomies::class,
+		];
 
 		/**
 		 * Registers instance.
@@ -29,9 +43,22 @@ if ( ! class_exists( 'Fieldify' ) ) {
 		 * @return void
 		 */
 		public static function register( string $file ): void {
-			if ( ! isset( self::$providers[ $file ] ) ) {
-				self::$providers[ $file ] = new ServiceProvider( $file );
-				self::$providers[ $file ]->register( new Container() );
+			static $container = null;
+
+			if ( ! is_null( $container ) || ! file_exists( $file ) ) {
+				return;
+			}
+
+			$container = new Container();
+
+			$container->make( Config::class, $file );
+
+			foreach ( self::SERVICES as $id ) {
+				$service = $container->make( $id );
+
+				if ( is_object( $service ) ) {
+					Hook::annotations( $service );
+				}
 			}
 		}
 	}
