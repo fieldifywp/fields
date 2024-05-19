@@ -313,6 +313,17 @@ class MetaBoxes {
 			'select'   => [
 				'type' => 'string',
 			],
+			'search'   => [
+				'type'       => 'object',
+				'properties' => [
+					'value' => [
+						'type' => 'string',
+					],
+					'label' => [
+						'type' => 'string',
+					],
+				],
+			],
 			'file'     => [
 				'type' => 'string',
 			],
