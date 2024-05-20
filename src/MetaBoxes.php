@@ -311,7 +311,15 @@ class MetaBoxes {
 				'type' => 'string',
 			],
 			'select'   => [
-				'type' => 'string',
+				'type'       => 'object',
+				'properties' => [
+					'value' => [
+						'type' => 'string',
+					],
+					'label' => [
+						'type' => 'string',
+					],
+				],
 			],
 			'search'   => [
 				'type'       => 'object',
