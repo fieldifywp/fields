@@ -11,6 +11,7 @@ use Fieldify\Fields\MetaBoxes;
 use Fieldify\Fields\PostTypes;
 use Fieldify\Fields\Settings;
 use Fieldify\Fields\Taxonomies;
+use Fieldify\Fields\UserInterface;
 
 /**
  * Fieldify facade.
@@ -31,6 +32,7 @@ final class Fieldify {
 		PostTypes::class,
 		Settings::class,
 		Taxonomies::class,
+		UserInterface::class,
 	];
 
 	/**

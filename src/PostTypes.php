@@ -14,6 +14,7 @@ use function esc_html;
 use function in_array;
 use function is_array;
 use function is_callable;
+use function is_null;
 use function is_string;
 use function post_type_exists;
 use function register_post_type;
@@ -95,7 +96,7 @@ class PostTypes {
 
 			$post_type_allowed_blocks = $args['allowed_blocks'] ?? null;
 
-			if ( ! $post_type_allowed_blocks ) {
+			if ( is_null( $post_type_allowed_blocks ) ) {
 				continue;
 			}
 
