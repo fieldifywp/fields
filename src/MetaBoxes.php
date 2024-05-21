@@ -42,16 +42,25 @@ class MetaBoxes {
 	private Config $config;
 
 	/**
+	 * Rest schema.
+	 *
+	 * @var RestSchema
+	 */
+	private RestSchema $rest_schema;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Config $config Config.
+	 * @param Config     $config      Config.
+	 * @param RestSchema $rest_schema Rest schema.
 	 *
 	 * @return void
 	 */
-	public function __construct( Config $config ) {
-		$this->config = $config;
+	public function __construct( Config $config, RestSchema $rest_schema ) {
+		$this->config      = $config;
+		$this->rest_schema = $rest_schema;
 	}
 
 	/**
@@ -99,7 +108,7 @@ class MetaBoxes {
 			$fields     = $meta_box['fields'] ?? [];
 
 			foreach ( $fields as $id => $field ) {
-				$schema = $this->get_item_schema( $field );
+				$schema = $this->rest_schema->get_item_schema( $field );
 				$type   = $schema['type'];
 
 				$args = [
@@ -275,156 +284,6 @@ class MetaBoxes {
 		}
 
 		return $formatted;
-	}
-
-	/**
-	 * Get the meta type based on the field type.
-	 *
-	 * @param array $field Field data.
-	 *
-	 * @return array
-	 */
-	public function get_item_schema( array $field ): array {
-		$type_map = [
-			'text'     => [
-				'type' => 'string',
-			],
-			'url'      => [
-				'type' => 'string',
-			],
-			'email'    => [
-				'type' => 'string',
-			],
-			'phone'    => [
-				'type' => 'string',
-			],
-			'password' => [
-				'type' => 'string',
-			],
-			'date'     => [
-				'type' => 'string',
-			],
-			'textarea' => [
-				'type' => 'string',
-			],
-			'radio'    => [
-				'type' => 'string',
-			],
-			'select'   => [
-				'type'       => 'object',
-				'properties' => [
-					'value' => [
-						'type' => 'string',
-					],
-					'label' => [
-						'type' => 'string',
-					],
-				],
-			],
-			'search'   => [
-				'type'       => 'object',
-				'properties' => [
-					'value' => [
-						'type' => 'string',
-					],
-					'label' => [
-						'type' => 'string',
-					],
-				],
-			],
-			'file'     => [
-				'type' => 'string',
-			],
-			'color'    => [
-				'type' => 'string',
-			],
-			'blocks'   => [
-				'type' => 'string',
-			],
-			'embed'    => [
-				'type' => 'string',
-			],
-			'number'   => [
-				'type' => 'number',
-			],
-			'range'    => [
-				'type' => 'number',
-			],
-			'image'    => [
-				'type' => 'number',
-			],
-			'checkbox' => [
-				'type' => 'boolean',
-			],
-			'toggle'   => [
-				'type' => 'boolean',
-			],
-			'icon'     => [
-				'type'       => 'object',
-				'properties' => [
-					'set'  => [
-						'type' => 'string',
-					],
-					'name' => [
-						'type' => 'string',
-					],
-					'html' => [
-						'type' => 'string',
-					],
-				],
-			],
-			'gallery'  => [
-				'type'  => 'array',
-				'items' => [
-					'type' => 'number',
-				],
-			],
-			'repeater' => [
-				'type'  => 'array',
-				'items' => [
-					'type' => 'object',
-				],
-			],
-			'license'  => [
-				'type'       => 'object',
-				'properties' => [
-					'license'       => [
-						'type' => 'string',
-					],
-					'licenseStatus' => [
-						'type' => 'string',
-					],
-				],
-			],
-			'code'     => [
-				'type' => 'string',
-			],
-			'post'     => [
-				'type'       => 'object',
-				'properties' => [
-					'value' => [
-						'type' => 'number',
-					],
-					'label' => [
-						'type' => 'string',
-					],
-				],
-			],
-		];
-
-		$field_type = $field['control'] ?? $field['type'] ?? 'text';
-		$schema     = $type_map[ $field_type ] ?? [ 'type' => 'string' ];
-		$sub_type   = $schema['items']['type'] ?? null;
-
-		if ( $sub_type === 'object' ) {
-			$sub_fields = $field['subfields'] ?? [];
-
-			foreach ( $sub_fields as $sub_field_id => $sub_field ) {
-				$schema['items']['properties'][ $sub_field_id ?? $sub_field['id'] ?? '' ] = $this->get_item_schema( $sub_field );
-			}
-		}
-
-		return $schema;
 	}
 
 	/**

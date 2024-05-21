@@ -27,14 +27,23 @@ class Settings {
 	private MetaBoxes $meta_boxes;
 
 	/**
+	 * Rest schema.
+	 *
+	 * @var RestSchema
+	 */
+	private RestSchema $rest_schema;
+
+	/**
 	 * Meta boxes.
 	 *
-	 * @param MetaBoxes $meta_boxes Meta boxes.
+	 * @param MetaBoxes  $meta_boxes  Meta boxes.
+	 * @param RestSchema $rest_schema Rest schema.
 	 *
 	 * @return void
 	 */
-	public function __construct( MetaBoxes $meta_boxes ) {
-		$this->meta_boxes = $meta_boxes;
+	public function __construct( MetaBoxes $meta_boxes, RestSchema $rest_schema ) {
+		$this->meta_boxes  = $meta_boxes;
+		$this->rest_schema = $rest_schema;
 	}
 
 	/**
@@ -120,7 +129,7 @@ class Settings {
 			$fields = [];
 
 			foreach ( ( $args['fields'] ?? [] ) as $field_id => $field ) {
-				$fields[ $field_id ] = $this->meta_boxes->get_item_schema( $field ) ?? [
+				$fields[ $field_id ] = $this->rest_schema->get_item_schema( $field ) ?? [
 					'type' => 'string',
 				];
 			}
