@@ -10,39 +10,40 @@ class RestSchema {
 		'text'        => [
 			'type' => 'string',
 		],
-		'url'         => [
-			'type' => 'string',
-		],
-		'email'       => [
-			'type' => 'string',
-		],
-		'phone'       => [
-			'type' => 'string',
-		],
-		'password'    => [
-			'type' => 'string',
-		],
-		'date'        => [
-			'type' => 'string',
-		],
 		'textarea'    => [
 			'type' => 'string',
 		],
 		'radio'       => [
 			'type' => 'string',
 		],
-		'select'      => [
-			'type'       => 'object',
-			'properties' => [
-				'value' => [
-					'type' => 'string',
-				],
-				'label' => [
-					'type' => 'string',
-				],
-			],
+		'color'       => [
+			'type' => 'string',
 		],
-		'search'      => [
+		'blocks'      => [
+			'type' => 'string',
+		],
+		'embed'       => [
+			'type' => 'string',
+		],
+		'code'        => [
+			'type' => 'string',
+		],
+		'number'      => [
+			'type' => 'number',
+		],
+		'range'       => [
+			'type' => 'number',
+		],
+		'image'       => [
+			'type' => 'number',
+		],
+		'checkbox'    => [
+			'type' => 'boolean',
+		],
+		'toggle'      => [
+			'type' => 'boolean',
+		],
+		'select'      => [
 			'type'       => 'object',
 			'properties' => [
 				'value' => [
@@ -66,33 +67,6 @@ class RestSchema {
 					],
 				],
 			],
-		],
-		'file'        => [
-			'type' => 'string',
-		],
-		'color'       => [
-			'type' => 'string',
-		],
-		'blocks'      => [
-			'type' => 'string',
-		],
-		'embed'       => [
-			'type' => 'string',
-		],
-		'number'      => [
-			'type' => 'number',
-		],
-		'range'       => [
-			'type' => 'number',
-		],
-		'image'       => [
-			'type' => 'number',
-		],
-		'checkbox'    => [
-			'type' => 'boolean',
-		],
-		'toggle'      => [
-			'type' => 'boolean',
 		],
 		'icon'        => [
 			'type'       => 'object',
@@ -130,9 +104,6 @@ class RestSchema {
 					'type' => 'string',
 				],
 			],
-		],
-		'code'        => [
-			'type' => 'string',
 		],
 		'post'        => [
 			'type'       => 'object',

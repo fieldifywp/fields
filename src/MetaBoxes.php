@@ -49,18 +49,27 @@ class MetaBoxes {
 	private RestSchema $rest_schema;
 
 	/**
+	 * Sanitizer.
+	 *
+	 * @var Sanitizer
+	 */
+	private Sanitizer $sanitizer;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @param Config     $config      Config.
 	 * @param RestSchema $rest_schema Rest schema.
+	 * @param Sanitizer  $sanitizer   Sanitizer.
 	 *
 	 * @return void
 	 */
-	public function __construct( Config $config, RestSchema $rest_schema ) {
+	public function __construct( Config $config, RestSchema $rest_schema, Sanitizer $sanitizer ) {
 		$this->config      = $config;
 		$this->rest_schema = $rest_schema;
+		$this->sanitizer   = $sanitizer;
 	}
 
 	/**
@@ -103,6 +112,8 @@ class MetaBoxes {
 			'boolean' => false,
 		];
 
+		$sanitizer = $this->sanitizer;
+
 		foreach ( $meta_boxes as $meta_box ) {
 			$post_types = $meta_box['post_types'] ?? [ 'post' ];
 			$fields     = $meta_box['fields'] ?? [];
@@ -112,17 +123,25 @@ class MetaBoxes {
 				$type   = $schema['type'];
 
 				$args = [
-					'type'          => $type,
-					'description'   => $field['label'] ?? Str::title_case( $id ),
-					'default'       => $field['default'] ?? $defaults[ $type ] ?? null,
-					'single'        => true,
-					'show_in_rest'  => true,
-					'auth_callback' => static fn(): bool => current_user_can( 'manage_options' ),
+					'type'              => $type,
+					'description'       => $field['label'] ?? Str::title_case( $id ),
+					'default'           => $field['default'] ?? $defaults[ $type ] ?? null,
+					'single'            => true,
+					'show_in_rest'      => true,
+					'auth_callback'     => static fn(): bool => current_user_can( 'manage_options' ),
+					'sanitize_callback' => static fn(
+						$meta_value,
+						string $meta_key,
+						string $object_type,
+						string $object_subtype = ''
+					) => $sanitizer->sanitize_field(
+						$meta_value,
+						$meta_key,
+						$object_type,
+						$object_subtype,
+						$field
+					),
 				];
-
-				if ( $field['sanitizeCallback'] ?? null ) {
-					$args['sanitize_callback'] = $field['sanitizeCallback'];
-				}
 
 				if ( in_array( $type, [ 'array', 'object' ], true ) ) {
 					$args['show_in_rest'] = [
