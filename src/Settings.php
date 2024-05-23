@@ -73,6 +73,10 @@ class Settings {
 		$formatted = [];
 
 		foreach ( $settings as $id => $args ) {
+			if ( ! isset( $args['name'] ) ) {
+				$args['name'] = $id;
+			}
+
 			$panels = $args['panels'] ?? [];
 
 			foreach ( $panels as $panel_id => $panel ) {
