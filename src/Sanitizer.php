@@ -28,18 +28,46 @@ class Sanitizer {
 		'image'    => 'intval',
 		'post'     => 'intval',
 		'html'     => 'wp_kses_post',
-		'code'     => 'wp_kses_post', // TODO: Add custom sanitization.
 
 		// Custom sanitizers.
 		'text'     => 'sanitize_input_field',
 		'select'   => 'sanitize_select_field',
 		'gallery'  => 'sanitize_gallery_field',
 		'icon'     => 'sanitize_icon_field',
+		'code'     => 'sanitize_code_field',
 		'repeater' => 'sanitize_repeater_field',
 	];
 
 	/**
 	 * Sanitize.
+	 *
+	 * @param mixed $value      Value.
+	 * @param array $field_args Field args.
+	 *
+	 * @return mixed
+	 */
+	public function sanitize( $value, array $field_args ) {
+		$type = $field_args['type'] ?? 'text';
+
+		if ( ! isset( self::MAP[ $type ] ) ) {
+			return sanitize_text_field( $value );
+		}
+
+		$callback = self::MAP[ $type ] ?? 'sanitize_text_field';
+
+		if ( method_exists( $this, $callback ) ) {
+			$sanitized = $this->$callback( $value, $field_args );
+		} elseif ( function_exists( $callback ) ) {
+			$sanitized = $callback( $value );
+		} else {
+			$sanitized = sanitize_text_field( $value );
+		}
+
+		return $sanitized;
+	}
+
+	/**
+	 * Sanitize post meta.
 	 *
 	 * @param mixed  $meta_value     Value.
 	 * @param string $meta_key       Meta key.
@@ -49,23 +77,9 @@ class Sanitizer {
 	 *
 	 * @return mixed
 	 */
-	public function sanitize_field( $meta_value, string $meta_key, string $object_type, string $object_subtype, array $field_args ) {
-		$type = $field_args['type'] ?? 'text';
-
-		if ( ! isset( self::MAP[ $type ] ) ) {
-			return sanitize_text_field( $meta_value );
-		}
-
-		$callback = self::MAP[ $type ] ?? 'sanitize_text_field';
-		$custom   = $field_args['sanitizeCallback'] ?? $field_args['sanitize_callback'] ?? null;
-
-		if ( method_exists( $this, $callback ) ) {
-			$sanitized = $this->$callback( $field_args, $meta_value, $meta_key, $object_type, $object_subtype );
-		} elseif ( function_exists( $callback ) ) {
-			$sanitized = $callback( $meta_value );
-		} else {
-			$sanitized = sanitize_text_field( $meta_value );
-		}
+	public function sanitize_meta( $meta_value, string $meta_key, string $object_type, string $object_subtype, array $field_args ) {
+		$sanitized = $this->sanitize( $meta_value, $field_args );
+		$custom    = $field_args['sanitizeCallback'] ?? $field_args['sanitize_callback'] ?? null;
 
 		if ( is_callable( $custom ) ) {
 			$sanitized = $custom( $sanitized, $meta_key, $object_type, $object_subtype );
@@ -75,14 +89,48 @@ class Sanitizer {
 	}
 
 	/**
+	 * Sanitize option.
+	 *
+	 * @param mixed  $original_value Option value.
+	 * @param string $option_name    Option name.
+	 * @param array  $args           Field args.
+	 */
+	public function sanitize_option( $original_value, string $option_name, array $args ) {
+		if ( empty( $original_value ) ) {
+			return [];
+		}
+
+		$fields    = $args['fields'] ?? [];
+		$sanitized = [];
+
+		foreach ( $original_value as $key => $value ) {
+			$field_args = $fields[ $key ] ?? [];
+
+			if ( $field_args ) {
+				$sanitized[ $key ] = $this->sanitize( $value, $field_args );
+			} else {
+				$sanitized[ $key ] = sanitize_text_field( $value );
+			}
+		}
+
+		$custom = $args['sanitizeCallback'] ?? $args['sanitize_callback'] ?? null;
+
+		if ( is_callable( $custom ) ) {
+			$sanitized = $custom( $sanitized, $option_name, $original_value );
+		}
+
+		return $sanitized;
+	}
+
+	/**
 	 * Sanitize input.
 	 *
-	 * @param array $field_args Field args.
 	 * @param mixed $meta_value Value.
+	 * @param array $field_args Field args.
 	 *
 	 * @return string
 	 */
-	private function sanitize_input_field( array $field_args, $meta_value ): string {
+	private function sanitize_input_field( $meta_value, array $field_args ): string {
 		$input_type = $field_args['input_type'] ?? $field_args['inputType'] ?? 'text';
 
 		$map = [
@@ -112,12 +160,12 @@ class Sanitizer {
 	/**
 	 * Sanitize select.
 	 *
-	 * @param array $field_args Field args.
 	 * @param mixed $meta_value Value.
+	 * @param array $field_args Field args.
 	 *
 	 * @return array
 	 */
-	private function sanitize_select_field( array $field_args, $meta_value ): array {
+	private function sanitize_select_field( $meta_value, array $field_args ): array {
 		if ( ! is_array( $meta_value ) ) {
 			return [];
 		}
@@ -142,12 +190,12 @@ class Sanitizer {
 	/**
 	 * Sanitize gallery.
 	 *
-	 * @param array $field_args Field args.
 	 * @param mixed $meta_value Value.
+	 * @param array $field_args Field args.
 	 *
 	 * @return array
 	 */
-	private function sanitize_gallery_field( array $field_args, $meta_value ): array {
+	private function sanitize_gallery_field( $meta_value, array $field_args ): array {
 		if ( ! is_array( $meta_value ) ) {
 			return [];
 		}
@@ -162,12 +210,12 @@ class Sanitizer {
 	/**
 	 * Sanitize icon.
 	 *
-	 * @param array $field_args Field args.
 	 * @param mixed $meta_value Value.
+	 * @param array $field_args Field args.
 	 *
 	 * @return array
 	 */
-	private function sanitize_icon_field( array $field_args, $meta_value ): array {
+	private function sanitize_icon_field( $meta_value, array $field_args ): array {
 		if ( ! is_array( $meta_value ) ) {
 			return [];
 		}
@@ -180,17 +228,49 @@ class Sanitizer {
 	}
 
 	/**
+	 * Sanitize code.
+	 *
+	 * @param mixed $meta_value Value.
+	 * @param array $field_args Field args.
+	 *
+	 * @return string
+	 */
+	private function sanitize_code_field( $meta_value, array $field_args ): string {
+		if ( ! $meta_value ) {
+			return '';
+		}
+
+		$map = [
+			'js'   => 'esc_js',
+			'json' => 'esc_js',
+			'css'  => 'strip_tags',
+			'html' => 'esc_html',
+		];
+
+		$language = $field_args['language'] ?? 'html';
+
+		if ( ! isset( $map[ $language ] ) ) {
+			return sanitize_text_field( $meta_value );
+		}
+
+		$callback = $map[ $language ];
+
+		if ( ! function_exists( $callback ) ) {
+			return sanitize_text_field( $meta_value );
+		}
+
+		return $callback( $meta_value );
+	}
+
+	/**
 	 * Sanitize repeater.
 	 *
-	 * @param array  $field_args     Field args.
-	 * @param mixed  $meta_value     Value.
-	 * @param string $meta_key       Meta key.
-	 * @param string $object_type    Object type.
-	 * @param string $object_subtype Object subtype.
+	 * @param array $field_args Field args.
+	 * @param mixed $meta_value Value.
 	 *
 	 * @return array
 	 */
-	private function sanitize_repeater_field( array $field_args, $meta_value, string $meta_key, string $object_type, string $object_subtype ): array {
+	private function sanitize_repeater_field( $meta_value, array $field_args ): array {
 		if ( ! is_array( $meta_value ) ) {
 			return [];
 		}
@@ -211,7 +291,7 @@ class Sanitizer {
 					continue;
 				}
 
-				$meta_value[ $index ][ $field_id ] = $this->sanitize_field( $field_value, $field_id, $object_type, $object_subtype, $subfield_args );
+				$meta_value[ $index ][ $field_id ] = $this->sanitize( $field_value, $subfield_args );
 			}
 		}
 

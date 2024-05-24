@@ -134,7 +134,7 @@ class MetaBoxes {
 						string $meta_key,
 						string $object_type,
 						string $object_subtype = ''
-					) => $sanitizer->sanitize_field(
+					) => $sanitizer->sanitize_meta(
 						$meta_value,
 						$meta_key,
 						$object_type,

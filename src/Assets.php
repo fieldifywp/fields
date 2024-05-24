@@ -9,11 +9,11 @@ use RuntimeException;
 use function array_values;
 use function esc_html;
 use function filemtime;
-use function function_exists;
-use function get_current_screen;
+use function get_option;
 use function get_post_type;
 use function glob;
 use function is_readable;
+use function wp_enqueue_media;
 use function wp_enqueue_script;
 use function wp_enqueue_style;
 use function wp_localize_script;
@@ -77,11 +77,40 @@ class Assets {
 	 *
 	 * @throws RuntimeException If asset file is not readable.
 	 *
-	 * @hook  enqueue_block_editor_assets 10
+	 * @hook  enqueue_block_editor_assets
+	 * @hook  admin_enqueue_scripts
 	 *
 	 * @return void
 	 */
 	public function enqueue_editor_assets(): void {
+		global $current_screen;
+
+		$is_block_editor = $current_screen && $current_screen->is_block_editor();
+
+		$settings = $this->settings->get_settings();
+
+		// Load for settings pages and block editor only.
+		if ( ! $current_screen || ! $is_block_editor ) {
+			$is_settings_page = false;
+
+			foreach ( $settings as $id => $args ) {
+				$settings_page = $args['page'] ?? null;
+
+				if ( ! $settings_page ) {
+					continue;
+				}
+
+				if ( $current_screen->id === 'settings_page_' . $settings_page ) {
+					$is_settings_page = true;
+					break;
+				}
+			}
+
+			if ( ! $is_settings_page ) {
+				return;
+			}
+		}
+
 		$dir        = $this->config->dir;
 		$asset_file = $dir . 'public/js/index.asset.php';
 
@@ -89,10 +118,9 @@ class Assets {
 			throw new RuntimeException( static::class . ' asset file is not readable. File path: ' . $asset_file );
 		}
 
-		$asset          = require $asset_file;
-		$slug           = $this->config->slug;
-		$url            = $this->config->url;
-		$current_screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		$asset = require $asset_file;
+		$slug  = $this->config->slug;
+		$url   = $this->config->url;
 
 		wp_register_style( ...array_values( [
 			'handle' => $slug,
@@ -115,12 +143,19 @@ class Assets {
 		wp_enqueue_script( $slug );
 
 		$args = [
-			'slug'       => $slug,
-			'postType'   => esc_html( get_post_type() ),
-			'siteEditor' => $current_screen && $current_screen->base === 'site-editor',
-			'blocks'     => $this->blocks->get_blocks(),
-			'settings'   => $this->settings->get_settings(),
+			'slug'        => $slug,
+			'postType'    => esc_html( get_post_type() ),
+			'siteEditor'  => $current_screen && $current_screen->base === 'site-editor',
+			'blockEditor' => $is_block_editor,
+			'blocks'      => $this->blocks->get_blocks(),
+			'settings'    => $settings,
 		];
+
+		if ( ! $is_block_editor ) {
+			foreach ( $settings as $id => $settings_args ) {
+				$args['options'][ $id ] = get_option( $id, [] );
+			}
+		}
 
 		$meta_boxes = $this->meta_boxes->get_meta_boxes();
 
@@ -132,6 +167,18 @@ class Assets {
 
 		// Enqueue CodeMirror assets.
 		wp_enqueue_style( 'wp-codemirror' );
+
+		if ( ! $is_block_editor ) {
+			foreach ( $asset['dependencies'] as $dependency ) {
+				wp_enqueue_script( $dependency );
+			}
+
+			wp_enqueue_media();
+
+			wp_enqueue_style( 'wp-components' );
+			wp_enqueue_style( 'wp-edit-post' );
+			wp_enqueue_style( 'wp-format-library' );
+		}
 	}
 
 	/**
