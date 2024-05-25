@@ -13,7 +13,6 @@ use Fieldify\Fields\PostTypes;
 use Fieldify\Fields\Settings;
 use Fieldify\Fields\Taxonomies;
 use Fieldify\Fields\TermFields;
-use Fieldify\Fields\UserInterface;
 
 /**
  * Fieldify facade/proxy.
@@ -35,7 +34,6 @@ final class Fieldify {
 		Settings::class,
 		Taxonomies::class,
 		TermFields::class,
-		UserInterface::class,
 	];
 
 	/**
