@@ -2,6 +2,7 @@
 
 declare( strict_types=1 );
 
+use Blockify\Container\Container;
 use Blockify\Container\ContainerFactory;
 use Blockify\Hooks\Hook;
 use Fieldify\Fields\Assets;
@@ -11,6 +12,7 @@ use Fieldify\Fields\MetaBoxes;
 use Fieldify\Fields\PostTypes;
 use Fieldify\Fields\Settings;
 use Fieldify\Fields\Taxonomies;
+use Fieldify\Fields\TermFields;
 use Fieldify\Fields\UserInterface;
 
 /**
@@ -32,8 +34,16 @@ final class Fieldify {
 		PostTypes::class,
 		Settings::class,
 		Taxonomies::class,
+		TermFields::class,
 		UserInterface::class,
 	];
+
+	/**
+	 * Container instance.
+	 *
+	 * @var ?Container
+	 */
+	private static ?Container $container = null;
 
 	/**
 	 * Registers instance.
@@ -43,18 +53,28 @@ final class Fieldify {
 	 * @return void
 	 */
 	public static function register( string $file ): void {
-		static $container = null;
-
-		if ( ! is_null( $container ) || ! file_exists( $file ) ) {
+		if ( ! is_null( self::$container ) || ! file_exists( $file ) ) {
 			return;
 		}
 
-		$container = ContainerFactory::create( self::class );
+		self::$container = ContainerFactory::create( self::class );
 
-		$container->make( Config::class, $file );
+		self::$container->make( Config::class, $file );
 
 		foreach ( self::SERVICES as $id ) {
-			Hook::annotations( $container->make( $id ) );
+			Hook::annotations( self::$container->make( $id ) );
 		}
+	}
+
+	/**
+	 * Registers custom term fields.
+	 *
+	 * @param string $taxonomy Taxonomy.
+	 * @param array  $fields   Fields.
+	 *
+	 * @return void
+	 */
+	public static function register_custom_term_fields( string $taxonomy, array $fields ): void {
+		self::$container->get( TermFields::class )->register_custom_term_fields( $taxonomy, $fields );
 	}
 }

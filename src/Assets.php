@@ -9,9 +9,11 @@ use RuntimeException;
 use function array_values;
 use function esc_html;
 use function filemtime;
+use function filter_input;
 use function get_option;
 use function get_post_type;
 use function glob;
+use function in_array;
 use function is_readable;
 use function wp_enqueue_media;
 use function wp_enqueue_script;
@@ -19,7 +21,9 @@ use function wp_enqueue_style;
 use function wp_localize_script;
 use function wp_register_script;
 use function wp_register_style;
+use const FILTER_SANITIZE_NUMBER_INT;
 use const GLOB_ONLYDIR;
+use const INPUT_GET;
 
 /**
  * Assets.
@@ -49,25 +53,35 @@ class Assets {
 	private Settings $settings;
 
 	/**
+	 * @var TermFields $term_fields
+	 */
+	private TermFields $term_fields;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.0.14
 	 *
-	 * @param Config    $config     Config.
-	 * @param Blocks    $blocks     Blocks.
-	 * @param MetaBoxes $meta_boxes Meta boxes.
-	 * @param Settings  $settings   Settings.
+	 * @param Config     $config      Config.
+	 * @param Blocks     $blocks      Blocks.
+	 * @param MetaBoxes  $meta_boxes  Meta boxes.
+	 * @param Settings   $settings    Settings.
+	 * @param TermFields $term_fields Term fields.
+	 *
+	 * @return void
 	 */
 	public function __construct(
-		Config    $config,
-		Blocks    $blocks,
-		MetaBoxes $meta_boxes,
-		Settings  $settings
+		Config     $config,
+		Blocks     $blocks,
+		MetaBoxes  $meta_boxes,
+		Settings   $settings,
+		TermFields $term_fields
 	) {
-		$this->config     = $config;
-		$this->blocks     = $blocks;
-		$this->meta_boxes = $meta_boxes;
-		$this->settings   = $settings;
+		$this->config      = $config;
+		$this->blocks      = $blocks;
+		$this->meta_boxes  = $meta_boxes;
+		$this->settings    = $settings;
+		$this->term_fields = $term_fields;
 	}
 
 	/**
@@ -86,12 +100,12 @@ class Assets {
 		global $current_screen;
 
 		$is_block_editor = $current_screen && $current_screen->is_block_editor();
-
-		$settings = $this->settings->get_settings();
+		$settings        = $this->settings->get_settings();
+		$term_fields     = $this->term_fields->get_custom_term_fields();
+		$load_assets     = $is_block_editor;
 
 		// Load for settings pages and block editor only.
 		if ( ! $current_screen || ! $is_block_editor ) {
-			$is_settings_page = false;
 
 			foreach ( $settings as $id => $args ) {
 				$settings_page = $args['page'] ?? null;
@@ -101,14 +115,21 @@ class Assets {
 				}
 
 				if ( $current_screen->id === 'settings_page_' . $settings_page ) {
-					$is_settings_page = true;
+					$load_assets = true;
 					break;
 				}
 			}
 
-			if ( ! $is_settings_page ) {
-				return;
+			foreach ( $term_fields as $taxonomy => $fields ) {
+				if ( $current_screen->id === 'edit-' . $taxonomy ) {
+					$load_assets = true;
+					break;
+				}
 			}
+		}
+
+		if ( ! $load_assets ) {
+			return;
 		}
 
 		$dir        = $this->config->dir;
@@ -161,6 +182,24 @@ class Assets {
 
 		if ( ! empty( $meta_boxes ) ) {
 			$args['metaBoxes'] = $meta_boxes;
+		}
+
+		if ( in_array( $current_screen->base, [ 'edit-tags', 'term' ], true ) ) {
+			$taxonomy                         = $current_screen->taxonomy;
+			$taxonomy_fields                  = $term_fields[ $taxonomy ] ?? [];
+			$args['termFields']               = [];
+			$args['termFields'] [ $taxonomy ] = $taxonomy_fields;
+			$tag_id                           = filter_input( INPUT_GET, 'tag_ID', FILTER_SANITIZE_NUMBER_INT );
+
+			foreach ( $taxonomy_fields as $field_id => $field_args ) {
+				$field_value = get_term_meta( $tag_id, $field_id, true );
+
+				if ( ! $field_value ) {
+					continue;
+				}
+
+				$args['termFields'][ $taxonomy ][ $field_id ]['default'] = $field_value;
+			}
 		}
 
 		wp_localize_script( $slug, $slug, $args );
