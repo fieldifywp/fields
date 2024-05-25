@@ -11,7 +11,12 @@ use function printf;
 
 class TermFields {
 
-	public const HOOK = 'fieldify_terms';
+	/**
+	 * Terms config.
+	 *
+	 * @var array
+	 */
+	private array $terms = [];
 
 	/**
 	 * Sanitizer instance.
@@ -39,11 +44,8 @@ class TermFields {
 	 *
 	 * @return void
 	 */
-	public static function register_custom_term_fields( string $taxonomy, array $fields ): void {
-		add_filter(
-			static::HOOK,
-			static fn( array $terms ): array => array_merge( $terms, [ $taxonomy => $fields ] )
-		);
+	public function register_term_fields( string $taxonomy, array $fields ): void {
+		$this->terms[ $taxonomy ] = $fields;
 	}
 
 	/**
@@ -77,7 +79,7 @@ class TermFields {
 	 * @return array
 	 */
 	public function get_custom_term_fields(): array {
-		return apply_filters( static::HOOK, [] );
+		return apply_filters( self::class, $this->terms );
 	}
 
 	/**

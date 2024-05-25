@@ -16,7 +16,7 @@ use Fieldify\Fields\TermFields;
 use Fieldify\Fields\UserInterface;
 
 /**
- * Fieldify facade.
+ * Fieldify facade/proxy.
  *
  * @since 1.0.0
  */
@@ -67,6 +67,67 @@ final class Fieldify {
 	}
 
 	/**
+	 * Register block.
+	 *
+	 * @param string $id   The block name.
+	 * @param array  $args The block arguments.
+	 *
+	 * @return void
+	 */
+	public static function register_block( string $id, array $args ): void {
+		self::$container->get( Blocks::class )->register_block( $id, $args );
+	}
+
+	/**
+	 * Registers a custom post type.
+	 *
+	 * @param string $id   The post type ID.
+	 * @param array  $args (Optional). The post type arguments.
+	 *
+	 * @return void
+	 */
+	public static function register_post_type( string $id, array $args = [] ): void {
+		self::$container->get( PostTypes::class )->register_post_type( $id, $args );
+	}
+
+	/**
+	 * Registers a custom taxonomy.
+	 *
+	 * @param string       $id        The taxonomy ID.
+	 * @param string|array $post_type Post type string or array of strings.
+	 * @param array        $args      The taxonomy arguments.
+	 *
+	 * @return void
+	 */
+	public static function register_taxonomy( string $id, $post_type, array $args ): void {
+		self::$container->get( Taxonomies::class )->register_taxonomy( $id, $post_type, $args );
+	}
+
+	/**
+	 * Registers a meta box.
+	 *
+	 * @param string $id   The meta box ID.
+	 * @param array  $args The meta box arguments.
+	 *
+	 * @return void
+	 */
+	public static function register_meta_box( string $id, array $args ): void {
+		self::$container->get( MetaBoxes::class )->register_meta_box( $id, $args );
+	}
+
+	/**
+	 * Registers a custom setting.
+	 *
+	 * @param string $id   The setting ID.
+	 * @param array  $args The setting arguments.
+	 *
+	 * @return void
+	 */
+	public static function register_settings( string $id, array $args ): void {
+		self::$container->get( Settings::class )->register_settings( $id, $args );
+	}
+
+	/**
 	 * Registers custom term fields.
 	 *
 	 * @param string $taxonomy Taxonomy.
@@ -74,7 +135,7 @@ final class Fieldify {
 	 *
 	 * @return void
 	 */
-	public static function register_custom_term_fields( string $taxonomy, array $fields ): void {
-		self::$container->get( TermFields::class )->register_custom_term_fields( $taxonomy, $fields );
+	public static function register_term_fields( string $taxonomy, array $fields ): void {
+		self::$container->get( TermFields::class )->register_term_fields( $taxonomy, $fields );
 	}
 }

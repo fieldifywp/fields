@@ -8,10 +8,8 @@ use Blockify\Utilities\Str;
 use WP_REST_Request;
 use WP_REST_Server;
 use function absint;
-use function add_filter;
 use function add_options_page;
 use function apply_filters;
-use function array_merge;
 use function current_user_can;
 use function esc_attr;
 use function esc_html;
@@ -29,7 +27,12 @@ use function wp_send_json_success;
  */
 class Settings {
 
-	public const HOOK = 'fieldify_settings';
+	/**
+	 * Settings configs.
+	 *
+	 * @var array
+	 */
+	private array $settings = [];
 
 	/**
 	 * Meta boxes.
@@ -74,11 +77,8 @@ class Settings {
 	 *
 	 * @return void
 	 */
-	public static function register_settings( string $id, array $settings ): void {
-		add_filter(
-			static::HOOK,
-			static fn( array $registered_settings ): array => array_merge( $registered_settings, [ $id => $settings ] )
-		);
+	public function register_settings( string $id, array $settings ): void {
+		$this->settings[ $id ] = $settings;
 	}
 
 	/**
@@ -89,9 +89,8 @@ class Settings {
 	 * @return array
 	 */
 	public function get_settings(): array {
-		$settings  = apply_filters( self::HOOK, [] );
+		$settings  = apply_filters( self::class, $this->settings );
 		$formatted = [];
-		$sanitizer = $this->sanitizer;
 
 		foreach ( $settings as $id => $args ) {
 			if ( ! isset( $args['name'] ) ) {

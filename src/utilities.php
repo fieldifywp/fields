@@ -4,11 +4,6 @@ declare( strict_types=1 );
 
 use Blockify\Icons\Icon;
 use Blockify\Utilities\Block;
-use Fieldify\Fields\Blocks;
-use Fieldify\Fields\MetaBoxes;
-use Fieldify\Fields\PostTypes;
-use Fieldify\Fields\Settings;
-use Fieldify\Fields\Taxonomies;
 
 if ( ! function_exists( 'register_custom_block' ) ) {
 
@@ -21,7 +16,7 @@ if ( ! function_exists( 'register_custom_block' ) ) {
 	 * @return void
 	 */
 	function register_custom_block( string $id, array $args ): void {
-		Blocks::register_block( $id, $args );
+		Fieldify::register_block( $id, $args );
 	}
 }
 
@@ -36,7 +31,7 @@ if ( ! function_exists( 'register_custom_post_type' ) ) {
 	 * @return void
 	 */
 	function register_custom_post_type( string $id, array $args = [] ): void {
-		PostTypes::register_post_type( $id, $args );
+		Fieldify::register_post_type( $id, $args );
 	}
 }
 
@@ -52,7 +47,7 @@ if ( ! function_exists( 'register_custom_taxonomy' ) ) {
 	 * @return void
 	 */
 	function register_custom_taxonomy( string $id, $post_type, array $args ): void {
-		Taxonomies::register_taxonomy( $id, $post_type, $args );
+		Fieldify::register_taxonomy( $id, $post_type, $args );
 	}
 }
 
@@ -67,7 +62,7 @@ if ( ! function_exists( 'register_custom_meta_box' ) ) {
 	 * @return void
 	 */
 	function register_custom_meta_box( string $id, array $args ): void {
-		MetaBoxes::register_meta_box( $id, $args );
+		Fieldify::register_meta_box( $id, $args );
 	}
 }
 
@@ -82,7 +77,22 @@ if ( ! function_exists( 'register_custom_settings' ) ) {
 	 * @return void
 	 */
 	function register_custom_settings( string $id, array $args ): void {
-		Settings::register_settings( $id, $args );
+		Fieldify::register_settings( $id, $args );
+	}
+}
+
+if ( ! function_exists( 'register_custom_term_fields' ) ) {
+
+	/**
+	 * Registers custom term fields.
+	 *
+	 * @param string $id   The term ID.
+	 * @param array  $args The term arguments.
+	 *
+	 * @return void
+	 */
+	function register_custom_term_fields( string $id, array $args ): void {
+		Fieldify::register_term_fields( $id, $args );
 	}
 }
 

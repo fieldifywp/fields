@@ -5,9 +5,7 @@ declare( strict_types=1 );
 namespace Fieldify\Fields;
 
 use Blockify\Utilities\Str;
-use function add_filter;
 use function apply_filters;
-use function array_merge;
 use function esc_html;
 use function register_taxonomy;
 use function wp_parse_args;
@@ -19,7 +17,12 @@ use function wp_parse_args;
  */
 class Taxonomies {
 
-	public const HOOK = 'fieldify_taxonomies';
+	/**
+	 * Taxonomies.
+	 *
+	 * @var array
+	 */
+	private array $taxonomies = [];
 
 	/**
 	 * Registers a taxonomy.
@@ -30,13 +33,10 @@ class Taxonomies {
 	 *
 	 * @return void
 	 */
-	public static function register_taxonomy( string $id, $post_type, array $args ): void {
+	public function register_taxonomy( string $id, $post_type, array $args ): void {
 		$args['post_types'] = (array) $post_type;
 
-		add_filter(
-			static::HOOK,
-			static fn( array $taxonomies ): array => array_merge( $taxonomies, [ $id => $args ] )
-		);
+		$this->taxonomies[ $id ] = $args;
 	}
 
 	/**
@@ -64,7 +64,7 @@ class Taxonomies {
 	 * @return ?array
 	 */
 	private function get_custom_taxonomies(): ?array {
-		$config     = apply_filters( static::HOOK, [] );
+		$config     = apply_filters( self::class, $this->taxonomies );
 		$taxonomies = [];
 
 		foreach ( $config as $taxonomy => $args ) {

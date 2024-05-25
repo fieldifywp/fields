@@ -12,7 +12,6 @@ use WP_Post;
 use function add_meta_box;
 use function apply_filters;
 use function array_key_exists;
-use function array_merge;
 use function current_user_can;
 use function esc_attr;
 use function filter_input;
@@ -32,7 +31,12 @@ use const INPUT_GET;
  */
 class MetaBoxes {
 
-	public const HOOK = 'fieldify_meta_boxes';
+	/**
+	 * Meta boxes.
+	 *
+	 * @var array
+	 */
+	private array $meta_boxes = [];
 
 	/**
 	 * Config.
@@ -80,14 +84,8 @@ class MetaBoxes {
 	 *
 	 * @return void
 	 */
-	public static function register_meta_box( string $id, array $args ): void {
-		add_filter(
-			static::HOOK,
-			static fn( array $meta_boxes ): array => array_merge(
-				$meta_boxes,
-				[ $id => $args ]
-			)
-		);
+	public function register_meta_box( string $id, array $args ): void {
+		$this->meta_boxes[ $id ] = $args;
 	}
 
 	/**
@@ -253,7 +251,7 @@ class MetaBoxes {
 	 * @return array <string, array> Meta boxes.
 	 */
 	public function get_meta_boxes(): array {
-		$meta_boxes = apply_filters( self::HOOK, [] );
+		$meta_boxes = apply_filters( self::class, $this->meta_boxes );
 
 		if ( empty( $meta_boxes ) ) {
 			return [];

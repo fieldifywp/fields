@@ -28,9 +28,14 @@ use function wp_list_pluck;
  */
 class Blocks {
 
-	public const  HOOK = 'fieldify_blocks';
-
 	private const DEFAULT_CATEGORY = 'custom';
+
+	/**
+	 * Blocks.
+	 *
+	 * @var array
+	 */
+	private array $blocks = [];
 
 	/**
 	 * Project directory.
@@ -82,11 +87,8 @@ class Blocks {
 	 *
 	 * @return void
 	 */
-	public static function register_block( string $id, array $args ): void {
-		add_filter(
-			static::HOOK,
-			static fn( array $blocks ): array => array_merge( $blocks, [ $id => $args ] )
-		);
+	public function register_block( string $id, array $args ): void {
+		$this->blocks[ $id ] = $args;
 	}
 
 	/**
@@ -146,7 +148,7 @@ class Blocks {
 	 * @return array
 	 */
 	public function get_blocks( bool $camel_case = true ): array {
-		$blocks = apply_filters( self::HOOK, [] );
+		$blocks = apply_filters( self::class, $this->blocks );
 
 		foreach ( $blocks as $name => $args ) {
 			$defaults = [

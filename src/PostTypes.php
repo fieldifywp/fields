@@ -7,9 +7,7 @@ namespace Fieldify\Fields;
 use Blockify\Utilities\Str;
 use WP_Block_Editor_Context;
 use function __;
-use function add_filter;
 use function apply_filters;
-use function array_merge;
 use function esc_html;
 use function in_array;
 use function is_array;
@@ -27,7 +25,12 @@ use function wp_parse_args;
  */
 class PostTypes {
 
-	public const HOOK = 'fieldify_post_types';
+	/**
+	 * Post types.
+	 *
+	 * @var array
+	 */
+	private array $post_types = [];
 
 	/**
 	 * Registers a taxonomy.
@@ -37,11 +40,8 @@ class PostTypes {
 	 *
 	 * @return void
 	 */
-	public static function register_post_type( string $id, array $args = [] ): void {
-		add_filter(
-			static::HOOK,
-			static fn( array $post_types ): array => array_merge( $post_types, [ $id => $args ] )
-		);
+	public function register_post_type( string $id, array $args = [] ): void {
+		$this->post_types[ $id ] = $args;
 	}
 
 	/**
@@ -118,7 +118,7 @@ class PostTypes {
 	 * @return ?array
 	 */
 	private function get_custom_post_types(): ?array {
-		$config     = apply_filters( static::HOOK, [] );
+		$config     = apply_filters( self::class, $this->post_types );
 		$post_types = [];
 
 		foreach ( $config as $post_type => $args ) {
