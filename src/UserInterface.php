@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Fieldify\Fields;
 
+use Fieldify;
 use function esc_html;
 use function get_post_meta;
 use function get_post_types;
@@ -20,7 +21,7 @@ class UserInterface {
 	 * @return void
 	 */
 	public function register(): void {
-		PostTypes::register_post_type(
+		Fieldify::register_post_type(
 			self::POST_TYPE,
 			[
 				'allowed_blocks' => [],
@@ -44,7 +45,7 @@ class UserInterface {
 			];
 		}
 
-		MetaBoxes::register_meta_box(
+		Fieldify::register_meta_box(
 			'field_group_settings',
 			[
 				'title'      => __( 'Field Group Settings', 'fieldify' ),
@@ -97,7 +98,7 @@ class UserInterface {
 			]
 		);
 
-		MetaBoxes::register_meta_box(
+		Fieldify::register_meta_box(
 			'fields',
 			[
 				'title'      => __( 'Field Groups', 'fieldify' ),
@@ -186,7 +187,7 @@ class UserInterface {
 			$fields     = (array) ( get_post_meta( $field_group->ID, 'fields', true ) ?? [] );
 
 			foreach ( $post_types as $post_type ) {
-				MetaBoxes::register_meta_box(
+				Fieldify::register_meta_box(
 					$field_group->post_name,
 					[
 						'title'      => $field_group->post_title,
