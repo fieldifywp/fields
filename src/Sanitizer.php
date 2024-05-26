@@ -5,6 +5,7 @@ declare( strict_types=1 );
 namespace Fieldify\Fields;
 
 use function function_exists;
+use function in_array;
 use function is_array;
 use function is_callable;
 use function method_exists;
@@ -26,12 +27,12 @@ class Sanitizer {
 		'number'   => 'floatval',
 		'range'    => 'floatval',
 		'image'    => 'intval',
-		'post'     => 'intval',
 		'html'     => 'wp_kses_post',
 
 		// Custom sanitizers.
 		'text'     => 'sanitize_input_field',
 		'select'   => 'sanitize_select_field',
+		'post'     => 'sanitize_select_field',
 		'gallery'  => 'sanitize_gallery_field',
 		'icon'     => 'sanitize_icon_field',
 		'code'     => 'sanitize_code_field',
@@ -171,16 +172,25 @@ class Sanitizer {
 		}
 
 		$multiple = $field_args['multiple'] ?? false;
+		$int_val  = in_array( $field_args['type'], [ 'post' ], true );
 
 		if ( $multiple ) {
 			foreach ( $meta_value as $option ) {
 				foreach ( $option as $key => $val ) {
-					$option[ $key ] = sanitize_text_field( $val );
+					if ( $key === 'value' && $int_val ) {
+						$option[ $key ] = intval( $val );
+					} else {
+						$option[ $key ] = sanitize_text_field( $val );
+					}
 				}
 			}
 		} else {
 			foreach ( $meta_value as $key => $val ) {
-				$meta_value[ $key ] = sanitize_text_field( $val );
+				if ( $key === 'value' && $int_val ) {
+					$meta_value[ $key ] = intval( $val );
+				} else {
+					$meta_value[ $key ] = sanitize_text_field( $val );
+				}
 			}
 		}
 
