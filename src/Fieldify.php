@@ -13,6 +13,7 @@ use Fieldify\Fields\PostTypes;
 use Fieldify\Fields\Settings;
 use Fieldify\Fields\Taxonomies;
 use Fieldify\Fields\TermFields;
+use Fieldify\Fields\UserProfile;
 
 /**
  * Fieldify facade/proxy.
@@ -34,6 +35,7 @@ final class Fieldify {
 		Settings::class,
 		Taxonomies::class,
 		TermFields::class,
+		UserProfile::class,
 	];
 
 	/**
@@ -135,5 +137,17 @@ final class Fieldify {
 	 */
 	public static function register_term_fields( string $taxonomy, array $fields ): void {
 		self::$container->get( TermFields::class )->register_term_fields( $taxonomy, $fields );
+	}
+
+	/**
+	 * Registers custom user profile fields.
+	 *
+	 * @param string $id     Fields ID.
+	 * @param array  $fields Fields.
+	 *
+	 * @return void
+	 */
+	public static function register_user_profile_fields( string $id, array $fields ): void {
+		self::$container->get( UserProfile::class )->register_user_profile_fields( $id, $fields );
 	}
 }

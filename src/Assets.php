@@ -10,6 +10,7 @@ use function array_values;
 use function esc_html;
 use function filemtime;
 use function filter_input;
+use function get_current_user_id;
 use function get_option;
 use function get_post_type;
 use function glob;
@@ -58,30 +59,38 @@ class Assets {
 	private TermFields $term_fields;
 
 	/**
+	 * @var UserProfile $user_profile
+	 */
+	private UserProfile $user_profile;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.0.14
 	 *
-	 * @param Config     $config      Config.
-	 * @param Blocks     $blocks      Blocks.
-	 * @param MetaBoxes  $meta_boxes  Meta boxes.
-	 * @param Settings   $settings    Settings.
-	 * @param TermFields $term_fields Term fields.
+	 * @param Config      $config       Config.
+	 * @param Blocks      $blocks       Blocks.
+	 * @param MetaBoxes   $meta_boxes   Meta boxes.
+	 * @param Settings    $settings     Settings.
+	 * @param TermFields  $term_fields  Term fields.
+	 * @param UserProfile $user_profile User profile.
 	 *
 	 * @return void
 	 */
 	public function __construct(
-		Config     $config,
-		Blocks     $blocks,
-		MetaBoxes  $meta_boxes,
-		Settings   $settings,
-		TermFields $term_fields
+		Config      $config,
+		Blocks      $blocks,
+		MetaBoxes   $meta_boxes,
+		Settings    $settings,
+		TermFields  $term_fields,
+		UserProfile $user_profile
 	) {
-		$this->config      = $config;
-		$this->blocks      = $blocks;
-		$this->meta_boxes  = $meta_boxes;
-		$this->settings    = $settings;
-		$this->term_fields = $term_fields;
+		$this->config       = $config;
+		$this->blocks       = $blocks;
+		$this->meta_boxes   = $meta_boxes;
+		$this->settings     = $settings;
+		$this->term_fields  = $term_fields;
+		$this->user_profile = $user_profile;
 	}
 
 	/**
@@ -102,6 +111,7 @@ class Assets {
 		$is_block_editor = $current_screen && $current_screen->is_block_editor();
 		$settings        = $this->settings->get_settings();
 		$term_fields     = $this->term_fields->get_custom_term_fields();
+		$users_fields    = $this->user_profile->get_user_profile_fields();
 		$load_assets     = $is_block_editor;
 
 		// Load for settings pages and block editor only.
@@ -125,6 +135,10 @@ class Assets {
 					$load_assets = true;
 					break;
 				}
+			}
+
+			if ( ! empty( $users_fields ) && $current_screen->id === 'profile' ) {
+				$load_assets = true;
 			}
 		}
 
@@ -184,12 +198,29 @@ class Assets {
 			$args['metaBoxes'] = $meta_boxes;
 		}
 
+		if ( ! empty( $users_fields ) && $current_screen->id === 'profile' ) {
+			$args['userProfileFields'] = $users_fields;
+			$current_user_id           = get_current_user_id();
+
+			foreach ( $users_fields as $id => $fields ) {
+				foreach ( $fields as $field_id => $field ) {
+					$field_value = get_user_meta( $current_user_id, $field_id, true );
+
+					if ( ! $field_value ) {
+						continue;
+					}
+
+					$args['userProfileFields'][ $id ][ $field_id ]['default'] = $field_value;
+				}
+			}
+		}
+
 		if ( in_array( $current_screen->base, [ 'edit-tags', 'term' ], true ) ) {
-			$taxonomy                         = $current_screen->taxonomy;
-			$taxonomy_fields                  = $term_fields[ $taxonomy ] ?? [];
-			$args['termFields']               = [];
-			$args['termFields'] [ $taxonomy ] = $taxonomy_fields;
-			$tag_id                           = filter_input( INPUT_GET, 'tag_ID', FILTER_SANITIZE_NUMBER_INT );
+			$taxonomy                        = $current_screen->taxonomy;
+			$taxonomy_fields                 = $term_fields[ $taxonomy ] ?? [];
+			$args['termFields']              = [];
+			$args['termFields'][ $taxonomy ] = $taxonomy_fields;
+			$tag_id                          = filter_input( INPUT_GET, 'tag_ID', FILTER_SANITIZE_NUMBER_INT );
 
 			foreach ( $taxonomy_fields as $field_id => $field_args ) {
 				$field_value = get_term_meta( $tag_id, $field_id, true );

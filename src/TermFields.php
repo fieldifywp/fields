@@ -8,6 +8,7 @@ use WP_Term;
 use function add_action;
 use function json_decode;
 use function printf;
+use function register_term_meta;
 
 class TermFields {
 
@@ -70,6 +71,22 @@ class TermFields {
 			add_action( "created_{$taxonomy}", [ $this, 'save_fields' ], 10, 3 );
 			add_action( "{$taxonomy}_edit_form", [ $this, 'render_fields' ], 10, 2 );
 			add_action( "edited_{$taxonomy}", [ $this, 'save_fields' ], 10, 3 );
+
+			foreach ( $fields as $field_id => $field ) {
+				register_term_meta(
+					$taxonomy,
+					$field_id,
+					[
+						'sanitize_callback' => static fn( $meta_value ) => $instance->sanitizer->sanitize_meta(
+							$meta_value,
+							$field_id,
+							'term',
+							$taxonomy,
+							$field
+						),
+					]
+				);
+			}
 		}
 	}
 
@@ -133,7 +150,13 @@ class TermFields {
 				continue;
 			}
 
-			$sanitized = $this->sanitizer->sanitize( $value, $fields[ $key ] );
+			$sanitized = $this->sanitizer->sanitize_meta(
+				$value,
+				$key,
+				'term',
+				$taxonomy,
+				$fields[ $key ]
+			);
 
 			update_term_meta( $term_id, $key, $sanitized );
 		}
