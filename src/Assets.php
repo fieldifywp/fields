@@ -109,6 +109,7 @@ class Assets {
 		global $current_screen;
 
 		$is_block_editor = $current_screen && $current_screen->is_block_editor();
+		$is_site_editor  = $current_screen && $current_screen->base === 'site-editor';
 		$settings        = $this->settings->get_settings();
 		$term_fields     = $this->term_fields->get_custom_term_fields();
 		$users_fields    = $this->user_profile->get_user_profile_fields();
@@ -177,10 +178,26 @@ class Assets {
 
 		wp_enqueue_script( $slug );
 
+		$site_editor_asset_file = $dir . 'public/js/index-site-editor.asset.php';
+
+		if ( $is_site_editor && is_readable( $site_editor_asset_file ) ) {
+			$site_editor_asset = require $site_editor_asset_file;
+
+			wp_register_script( ...array_values( [
+				'handle'    => $slug . '-site-editor',
+				'src'       => $url . 'public/js/index-site-editor.js',
+				'deps'      => $site_editor_asset['dependencies'] ?? [],
+				'ver'       => $site_editor_asset['version'] ?? filemtime( $dir . 'public/js/index-site-editor.js' ),
+				'in_footer' => true,
+			] ) );
+
+			wp_enqueue_script( $slug . '-site-editor' );
+		}
+
 		$args = [
 			'slug'        => $slug,
 			'postType'    => esc_html( get_post_type() ),
-			'siteEditor'  => $current_screen && $current_screen->base === 'site-editor',
+			'siteEditor'  => $is_site_editor,
 			'blockEditor' => $is_block_editor,
 			'blocks'      => $this->blocks->get_blocks(),
 			'settings'    => $settings,

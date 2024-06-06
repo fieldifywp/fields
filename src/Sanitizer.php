@@ -16,7 +16,7 @@ class Sanitizer {
 	private const MAP = [
 
 		// Standard sanitizers.
-		'textarea' => 'sanitize_text_field',
+		'textarea' => 'sanitize_textarea_field',
 		'radio'    => 'sanitize_text_field',
 		'color'    => 'sanitize_text_field',
 		'license'  => 'sanitize_text_field',
