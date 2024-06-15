@@ -113,6 +113,7 @@ class Assets {
 		$settings        = $this->settings->get_settings();
 		$term_fields     = $this->term_fields->get_custom_term_fields();
 		$users_fields    = $this->user_profile->get_user_profile_fields();
+		$is_user_profile = ! empty( $users_fields ) && in_array( $current_screen->id ?? '', [ 'profile', 'user-edit' ], true );
 		$load_assets     = $is_block_editor;
 
 		// Load for settings pages and block editor only.
@@ -138,7 +139,7 @@ class Assets {
 				}
 			}
 
-			if ( ! empty( $users_fields ) && $current_screen->id === 'profile' ) {
+			if ( $is_user_profile ) {
 				$load_assets = true;
 			}
 		}
@@ -215,7 +216,7 @@ class Assets {
 			$args['metaBoxes'] = $meta_boxes;
 		}
 
-		if ( ! empty( $users_fields ) && $current_screen->id === 'profile' ) {
+		if ( $is_user_profile ) {
 			$args['userProfileFields'] = $users_fields;
 			$current_user_id           = get_current_user_id();
 
