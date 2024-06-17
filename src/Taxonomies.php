@@ -7,6 +7,7 @@ namespace Fieldify\Fields;
 use Blockify\Utilities\Str;
 use function apply_filters;
 use function esc_html;
+use function esc_html__;
 use function register_taxonomy;
 use function wp_parse_args;
 
@@ -75,23 +76,23 @@ class Taxonomies {
 				'name'                       => $plural,
 				'singular_name'              => $singular,
 				'menu_name'                  => $plural,
-				'all_items'                  => __( 'All ', 'fieldify' ) . $plural,
-				'parent_item'                => __( 'Parent ', 'fieldify' ) . $singular,
-				'parent_item_colon'          => __( 'Parent ', 'fieldify' ) . $singular . ':',
-				'new_item_name'              => __( 'New ', 'fieldify' ) . $singular . __( ' Name', 'fieldify' ),
-				'add_new_item'               => __( 'Add New ', 'fieldify' ) . $singular,
-				'edit_item'                  => __( 'Edit ', 'fieldify' ) . $singular,
-				'update_item'                => __( 'Update ', 'fieldify' ) . $singular,
-				'view_item'                  => __( 'View ', 'fieldify' ) . $singular,
-				'separate_items_with_commas' => __( 'Separate ', 'fieldify' ) . $plural . __( ' with commas', 'fieldify' ),
-				'add_or_remove_items'        => __( 'Add or remove ', 'fieldify' ) . $plural,
-				'choose_from_most_used'      => __( 'Choose from the most used', 'fieldify' ),
-				'popular_items'              => __( 'Popular ', 'fieldify' ) . $plural,
-				'search_items'               => __( 'Search ', 'fieldify' ) . $plural,
-				'not_found'                  => __( 'Not Found', 'fieldify' ),
-				'no_terms'                   => __( 'No ', 'fieldify' ) . $plural,
-				'items_list'                 => $plural . __( ' list', 'fieldify' ),
-				'items_list_navigation'      => $plural . __( ' list navigation', 'fieldify' ),
+				'all_items'                  => esc_html__( 'All ', 'fieldify' ) . $plural,
+				'parent_item'                => esc_html__( 'Parent ', 'fieldify' ) . $singular,
+				'parent_item_colon'          => esc_html__( 'Parent ', 'fieldify' ) . $singular . ':',
+				'new_item_name'              => esc_html__( 'New ', 'fieldify' ) . $singular . esc_html__( ' Name', 'fieldify' ),
+				'add_new_item'               => esc_html__( 'Add New ', 'fieldify' ) . $singular,
+				'edit_item'                  => esc_html__( 'Edit ', 'fieldify' ) . $singular,
+				'update_item'                => esc_html__( 'Update ', 'fieldify' ) . $singular,
+				'view_item'                  => esc_html__( 'View ', 'fieldify' ) . $singular,
+				'separate_items_with_commas' => esc_html__( 'Separate ', 'fieldify' ) . $plural . esc_html__( ' with commas', 'fieldify' ),
+				'add_or_remove_items'        => esc_html__( 'Add or remove ', 'fieldify' ) . $plural,
+				'choose_from_most_used'      => esc_html__( 'Choose from the most used', 'fieldify' ),
+				'popular_items'              => esc_html__( 'Popular ', 'fieldify' ) . $plural,
+				'search_items'               => esc_html__( 'Search ', 'fieldify' ) . $plural,
+				'not_found'                  => esc_html__( 'Not Found', 'fieldify' ),
+				'no_terms'                   => esc_html__( 'No ', 'fieldify' ) . $plural,
+				'items_list'                 => $plural . esc_html__( ' list', 'fieldify' ),
+				'items_list_navigation'      => $plural . esc_html__( ' list navigation', 'fieldify' ),
 			];
 
 			$defaults = [

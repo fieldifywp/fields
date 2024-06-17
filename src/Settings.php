@@ -10,6 +10,7 @@ use WP_REST_Server;
 use function absint;
 use function add_options_page;
 use function apply_filters;
+use function array_values;
 use function current_user_can;
 use function esc_attr;
 use function esc_html;
@@ -191,20 +192,36 @@ class Settings {
 		$instance = $this;
 
 		foreach ( $settings as $id => $args ) {
-			$page = esc_html( $args['page'] ?? '' );
+			$page = esc_html( $args['menu_page'] ?? $args['page'] ?? '' );
 
 			if ( empty( $page ) ) {
 				continue;
 			}
 
-			add_options_page(
-				esc_html( $args['title'] ?? Str::title_case( $id ) ),
-				esc_html( $args['title'] ?? Str::title_case( $id ) ),
-				esc_html( $args['capability'] ?? 'manage_options' ),
-				$page,
-				static fn() => $instance->render_settings_page( $id ),
-				absint( $args['position'] ?? 10 )
-			);
+			$params = [
+				'page_title' => esc_html( $args['title'] ?? Str::title_case( $id ) ),
+				'menu_title' => esc_html( $args['title'] ?? Str::title_case( $id ) ),
+				'capability' => esc_html( $args['capability'] ?? 'manage_options' ),
+				'menu_slug'  => $page,
+				'callback'   => static fn() => $instance->render_settings_page( $id ),
+				'position'   => absint( $args['position'] ?? 10 ),
+			];
+
+			$menu_params = [
+				'page_title' => $params['page_title'],
+				'menu_title' => $params['menu_title'],
+				'capability' => $params['capability'],
+				'menu_slug'  => $params['menu_slug'],
+				'callback'   => $params['callback'],
+				'icon_url'   => esc_html( $args['icon'] ?? '' ),
+				'position'   => $params['position'],
+			];
+
+			if ( $args['menu_page'] ?? false ) {
+				add_menu_page( ...array_values( $menu_params ) );
+			} else {
+				add_options_page( ...array_values( $params ) );
+			}
 		}
 	}
 

@@ -21,6 +21,7 @@ use function is_array;
 use function is_null;
 use function is_string;
 use function printf;
+use function wp_kses_post;
 use const FILTER_SANITIZE_FULL_SPECIAL_CHARS;
 use const INPUT_GET;
 
@@ -289,6 +290,15 @@ class MetaBoxes {
 				// Remove duplicate fields.
 				if ( array_key_exists( $field_id, $meta_box['fields'] ) ) {
 					continue;
+				}
+
+				// Sanitize text values.
+				$text_values = [ 'name', 'label', 'tooltip', 'description', 'help', 'placeholder' ];
+
+				foreach ( $text_values as $text_value ) {
+					if ( isset( $field[ $text_value ] ) ) {
+						$field[ $text_value ] = wp_kses_post( $field[ $text_value ] );
+					}
 				}
 
 				$field = Arr::keys_to_camel_case( $field );

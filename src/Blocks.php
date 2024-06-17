@@ -7,6 +7,7 @@ namespace Fieldify\Fields;
 use Blockify\Utilities\Arr;
 use Blockify\Utilities\Path;
 use Blockify\Utilities\Str;
+use Fieldify\Fields\Models\Block;
 use function add_action;
 use function apply_filters;
 use function array_replace;
@@ -148,9 +149,23 @@ class Blocks {
 	 * @return array
 	 */
 	public function get_blocks( bool $camel_case = true ): array {
-		$blocks = apply_filters( self::class, $this->blocks );
+
+		/**
+		 * Filters the blocks.
+		 *
+		 * @param array $blocks The blocks.
+		 * @param Block $block  New block instance to create blocks. (optional)
+		 *
+		 * @return array
+		 */
+		$blocks = apply_filters( self::class, $this->blocks, Block::create() );
 
 		foreach ( $blocks as $name => $args ) {
+
+			if ( $name === 'arraypress/conditional' ) {
+				//s( $args );
+			}
+
 			$defaults = [
 				'apiVersion' => 2,
 				'name'       => $name,

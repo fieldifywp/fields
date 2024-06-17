@@ -6,9 +6,10 @@ namespace Fieldify\Fields;
 
 use Blockify\Utilities\Str;
 use WP_Block_Editor_Context;
-use function __;
 use function apply_filters;
+use function array_replace_recursive;
 use function esc_html;
+use function esc_html__;
 use function in_array;
 use function is_array;
 use function is_callable;
@@ -16,7 +17,6 @@ use function is_null;
 use function is_string;
 use function post_type_exists;
 use function register_post_type;
-use function wp_parse_args;
 
 /**
  * PostTypes class.
@@ -113,6 +113,74 @@ class PostTypes {
 	}
 
 	/**
+	 * Returns post type default arguments.
+	 *
+	 * @param string $post_type Post type.
+	 * @param array  $args      Post type arguments.
+	 *
+	 * @return array
+	 */
+	public function get_post_type_args( string $post_type, array $args ): array {
+		$singular = esc_html( $args['singular'] ?? Str::title_case( $post_type ) );
+		$plural   = esc_html( $args['plural'] ?? $singular . 's' );
+
+		$labels = [
+			'name'                  => $plural,
+			'singular_name'         => $singular,
+			'menu_name'             => $plural,
+			'name_admin_bar'        => $singular,
+			'archives'              => $singular . esc_html__( ' Archives', 'fieldify' ),
+			'attributes'            => $singular . esc_html__( ' Attributes', 'fieldify' ),
+			'parent_item_colon'     => esc_html__( 'Parent :', 'fieldify' ) . $singular . ':',
+			'all_items'             => esc_html__( 'All ', 'fieldify' ) . $plural,
+			'add_new_item'          => esc_html__( 'Add New ', 'fieldify' ) . $singular,
+			'add_new'               => esc_html__( 'Add New', 'fieldify' ),
+			'new_item'              => esc_html__( 'New ', 'fieldify' ) . $singular,
+			'edit_item'             => esc_html__( 'Edit ', 'fieldify' ) . $singular,
+			'update_item'           => esc_html__( 'Update ', 'fieldify' ) . $singular,
+			'view_item'             => esc_html__( 'View ', 'fieldify' ) . $singular,
+			'view_items'            => esc_html__( 'View ', 'fieldify' ) . $plural,
+			'search_items'          => esc_html__( 'Search ', 'fieldify' ) . $singular,
+			'not_found'             => esc_html__( 'Not found', 'fieldify' ),
+			'not_found_in_trash'    => esc_html__( 'Not found in Trash', 'fieldify' ),
+			'featured_image'        => esc_html__( 'Featured Image', 'fieldify' ),
+			'set_featured_image'    => esc_html__( 'Set featured image', 'fieldify' ),
+			'remove_featured_image' => esc_html__( 'Remove featured image', 'fieldify' ),
+			'use_featured_image'    => esc_html__( 'Use as featured image', 'fieldify' ),
+			'insert_into_item'      => esc_html__( 'Insert into ', 'fieldify' ) . $singular,
+			'uploaded_to_this_item' => esc_html__( 'Uploaded to this ', 'fieldify' ) . $singular,
+			'items_list'            => $plural . esc_html__( ' list', 'fieldify' ),
+			'items_list_navigation' => $plural . esc_html__( ' list navigation', 'fieldify' ),
+			'filter_items_list'     => esc_html__( 'Filter ', 'fieldify' ) . $plural . esc_html__( ' list', 'fieldify' ),
+		];
+
+		// Note: Custom field support is required for meta fields to work.
+		$defaults = [
+			'label'               => $plural,
+			'description'         => $plural . esc_html__( ' Description', 'fieldify' ),
+			'labels'              => $labels,
+			'supports'            => [ 'title', 'editor', 'thumbnail', 'custom-fields', 'excerpt' ],
+			'taxonomies'          => [],
+			'hierarchical'        => false,
+			'public'              => true,
+			'show_ui'             => true,
+			'show_in_menu'        => true,
+			'menu_position'       => 5,
+			'menu_icon'           => 'dashicons-admin-post',
+			'show_in_admin_bar'   => true,
+			'show_in_nav_menus'   => true,
+			'can_export'          => true,
+			'has_archive'         => true,
+			'exclude_from_search' => false,
+			'publicly_queryable'  => true,
+			'show_in_rest'        => true,
+			'capability_type'     => 'page',
+		];
+
+		return array_replace_recursive( $defaults, $args );
+	}
+
+	/**
 	 * Gets custom post types.
 	 *
 	 * @return ?array
@@ -122,63 +190,7 @@ class PostTypes {
 		$post_types = [];
 
 		foreach ( $config as $post_type => $args ) {
-			$singular = esc_html( $args['singular'] ?? Str::title_case( $post_type ) );
-			$plural   = esc_html( $args['plural'] ?? $singular . 's' );
-
-			$labels = [
-				'name'                  => $plural,
-				'singular_name'         => $singular,
-				'menu_name'             => $plural,
-				'name_admin_bar'        => $singular,
-				'archives'              => $singular . __( ' Archives', 'fieldify' ),
-				'attributes'            => $singular . __( ' Attributes', 'fieldify' ),
-				'parent_item_colon'     => __( 'Parent :', 'fieldify' ) . $singular . ':',
-				'all_items'             => __( 'All ', 'fieldify' ) . $plural,
-				'add_new_item'          => __( 'Add New ', 'fieldify' ) . $singular,
-				'add_new'               => __( 'Add New', 'fieldify' ),
-				'new_item'              => __( 'New ', 'fieldify' ) . $singular,
-				'edit_item'             => __( 'Edit ', 'fieldify' ) . $singular,
-				'update_item'           => __( 'Update ', 'fieldify' ) . $singular,
-				'view_item'             => __( 'View ', 'fieldify' ) . $singular,
-				'view_items'            => __( 'View ', 'fieldify' ) . $plural,
-				'search_items'          => __( 'Search ', 'fieldify' ) . $singular,
-				'not_found'             => __( 'Not found', 'fieldify' ),
-				'not_found_in_trash'    => __( 'Not found in Trash', 'fieldify' ),
-				'featured_image'        => __( 'Featured Image', 'fieldify' ),
-				'set_featured_image'    => __( 'Set featured image', 'fieldify' ),
-				'remove_featured_image' => __( 'Remove featured image', 'fieldify' ),
-				'use_featured_image'    => __( 'Use as featured image', 'fieldify' ),
-				'insert_into_item'      => __( 'Insert into ', 'fieldify' ) . $singular,
-				'uploaded_to_this_item' => __( 'Uploaded to this ', 'fieldify' ) . $singular,
-				'items_list'            => $plural . __( ' list', 'fieldify' ),
-				'items_list_navigation' => $plural . __( ' list navigation', 'fieldify' ),
-				'filter_items_list'     => __( 'Filter ', 'fieldify' ) . $plural . __( ' list', 'fieldify' ),
-			];
-
-			// Note: Custom field support is required for meta fields to work.
-			$defaults = [
-				'label'               => $plural,
-				'description'         => $plural . __( ' Description', 'fieldify' ),
-				'labels'              => $labels,
-				'supports'            => [ 'title', 'editor', 'thumbnail', 'custom-fields', 'excerpt' ],
-				'taxonomies'          => [],
-				'hierarchical'        => false,
-				'public'              => true,
-				'show_ui'             => true,
-				'show_in_menu'        => true,
-				'menu_position'       => 5,
-				'menu_icon'           => 'dashicons-admin-post',
-				'show_in_admin_bar'   => true,
-				'show_in_nav_menus'   => true,
-				'can_export'          => true,
-				'has_archive'         => true,
-				'exclude_from_search' => false,
-				'publicly_queryable'  => true,
-				'show_in_rest'        => true,
-				'capability_type'     => 'page',
-			];
-
-			$post_types[ $post_type ] = wp_parse_args( $args, $defaults );
+			$post_types[ $post_type ] = $this->get_post_type_args( $post_type, $args );
 		}
 
 		return $post_types;
