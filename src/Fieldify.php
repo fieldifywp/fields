@@ -4,10 +4,12 @@ declare( strict_types=1 );
 
 use Blockify\Container\Container;
 use Blockify\Container\ContainerFactory;
+use Blockify\Container\Interfaces\Registerable;
 use Blockify\Hooks\Hook;
 use Fieldify\Fields\Assets;
 use Fieldify\Fields\Blocks;
 use Fieldify\Fields\Config;
+use Fieldify\Fields\Integrations\EDD;
 use Fieldify\Fields\MetaBoxes;
 use Fieldify\Fields\PostTypes;
 use Fieldify\Fields\Settings;
@@ -36,6 +38,9 @@ final class Fieldify {
 		Taxonomies::class,
 		TermFields::class,
 		UserProfile::class,
+
+		// Integrations.
+		EDD::class,
 	];
 
 	/**
@@ -62,7 +67,13 @@ final class Fieldify {
 		self::$container->make( Config::class, $file );
 
 		foreach ( self::SERVICES as $id ) {
-			Hook::annotations( self::$container->make( $id ) );
+			$service = self::$container->make( $id );
+
+			if ( $service instanceof Registerable ) {
+				$service->register( self::$container );
+			}
+
+			Hook::annotations( $service );
 		}
 	}
 
